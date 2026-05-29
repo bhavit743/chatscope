@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WhatsApp Chat Analyser</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --green: #25D366;
+    --green-dark: #128C7E;
+    --green-light: #dcf8c6;
+    --bg: #0a0f0d;
+    --bg2: #111a16;
+    --bg3: #1a2820;
+    --card: #162117;
+    --border: rgba(37,211,102,0.15);
+    --border2: rgba(37,211,102,0.08);
+    --text: #e8f5ee;
+    --muted: #6b9a7a;
+    --danger: #ff5a5a;
+    --amber: #f0a500;
+    --blue: #4a9eff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BG pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(37,211,102,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(18,140,126,0.05) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* HEADER */
+  header {
+    padding: 32px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: var(--green);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-icon svg { width: 24px; height: 24px; fill: #fff; }
+  .logo-text { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); }
+  .logo-text span { color: var(--green); }
+  .badge-privacy {
+    font-size: 11px;
+    background: rgba(37,211,102,0.1);
+    color: var(--green);
+    border: 1px solid rgba(37,211,102,0.2);
+    border-radius: 20px;
+    padding: 4px 12px;
+    display: flex; align-items: center; gap: 5px;
+  }
+
+  /* HERO */
+  .hero {
+    padding: 56px 0 48px;
+    text-align: center;
+  }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 6vw, 64px);
+    font-weight: 800;
+    line-height: 1.05;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  .hero h1 em {
+    font-style: normal;
+    color: var(--green);
+  }
+  .hero p {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 480px;
+    margin: 0 auto 8px;
+    line-height: 1.6;
+  }
+
+  /* HOW TO EXPORT */
+  .how-strip {
+    background: rgba(37,211,102,0.05);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 32px;
+    text-align: left;
+  }
+  .how-strip .icon { font-size: 20px; margin-top: 1px; flex-shrink: 0; }
+  .how-strip strong { font-size: 13px; font-weight: 500; color: var(--text); }
+  .how-strip p { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+  /* UPLOAD ZONE */
+  .upload-section { margin-bottom: 32px; }
+  #dropzone {
+    border: 2px dashed var(--border);
+    border-radius: 20px;
+    padding: 48px 32px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--bg2);
+    position: relative;
+  }
+  #dropzone:hover, #dropzone.drag-over {
+    border-color: var(--green);
+    background: rgba(37,211,102,0.04);
+  }
+  #dropzone.drag-over { transform: scale(1.01); }
+  .drop-icon {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: rgba(37,211,102,0.1);
+    margin: 0 auto 16px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .drop-icon svg { width: 28px; height: 28px; stroke: var(--green); fill: none; stroke-width: 1.8; }
+  #dropzone h3 { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  #dropzone p { font-size: 14px; color: var(--muted); margin-bottom: 20px; }
+  .btn-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--green);
+    color: #0a0f0d;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 22px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-upload:hover { background: #1fc55e; }
+  .btn-upload:active { transform: scale(0.97); }
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border2);
+  }
+  textarea {
+    width: 100%;
+    height: 140px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: 'DM Sans', monospace;
+    font-size: 12.5px;
+    color: var(--text);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+    line-height: 1.5;
+  }
+  textarea::placeholder { color: var(--muted); opacity: 0.6; }
+  textarea:focus { border-color: var(--green); }
+  .action-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--green);
+    color: #0a0f0d;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 24px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-primary:hover { background: #1fc55e; }
+  .btn-primary:active { transform: scale(0.97); }
+  .btn-ghost {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+  /* ERROR */
+  .error-box {
+    background: rgba(255,90,90,0.08);
+    border: 1px solid rgba(255,90,90,0.25);
+    color: #ff8a8a;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* RESULTS */
+  #results { display: none; animation: fadeUp 0.4s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    margin-top: 40px;
+  }
+
+  /* STAT GRID */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 14px;
+    padding: 18px 16px;
+  }
+  .stat-card .label { font-size: 11px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-card .value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--text); }
+  .stat-card .sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  /* PERSON CARDS */
+  .person-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .person-card {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 18px;
+    padding: 18px 20px;
+    transition: border-color 0.2s;
+  }
+  .person-card:hover { border-color: var(--border); }
+  .person-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    flex-shrink: 0;
+    color: #fff;
+  }
+  .person-name { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
+  .person-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .crown-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+  .crown {
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 20px;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .crown-green { background: rgba(37,211,102,0.12); color: var(--green); }
+  .crown-red { background: rgba(255,90,90,0.12); color: #ff8a8a; }
+  .crown-amber { background: rgba(240,165,0,0.12); color: var(--amber); }
+  .crown-blue { background: rgba(74,158,255,0.12); color: var(--blue); }
+  .prog-bar {
+    height: 4px;
+    background: rgba(37,211,102,0.1);
+    border-radius: 2px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .prog-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 0;
+    border-top: 1px solid var(--border2);
+    font-size: 13px;
+  }
+  .stat-row .key { color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .stat-row .val { font-weight: 500; color: var(--text); font-family: 'Syne', sans-serif; }
+  .val-danger { color: var(--danger) !important; }
+
+  /* CHARTS */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 0;
+  }
+  @media (max-width: 620px) { .charts-grid { grid-template-columns: 1fr; } }
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 18px;
+    padding: 18px 20px;
+  }
+  .chart-card h3 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  /* LEADERBOARD */
+  .leaderboard { display: flex; flex-direction: column; gap: 8px; }
+  .lb-row {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg3);
+    border-radius: 10px;
+    padding: 10px 14px;
+  }
+  .lb-rank { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--muted); width: 20px; flex-shrink: 0; }
+  .lb-rank.gold { color: var(--amber); }
+  .lb-name { flex: 1; font-size: 13px; }
+  .lb-val { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--green); }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 48px 0 32px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  footer strong { color: var(--green); }
+
+  #fileInput { display: none; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  .btn-share {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: transparent;
+    color: var(--green);
+    border: 1.5px solid var(--green);
+    border-radius: 12px;
+    padding: 13px 32px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+  .btn-share:hover { background: rgba(37,211,102,0.08); transform: translateY(-1px); }
+  .btn-share:active { transform: scale(0.97); }
+  #shareModal { display: none; }
+  #shareModal.open { display: flex !important; }
+
+
+  /* CHEMISTRY */
+  .chem-podium { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; }
+  .chem-card {
+    background:var(--card);
+    border:1px solid var(--border2);
+    border-radius:18px;
+    padding:16px 18px;
+    transition:border-color 0.2s;
+    position:relative;
+    overflow:hidden;
+  }
+  .chem-card:hover { border-color:var(--border); }
+  .chem-card.top { border-color:rgba(240,165,0,0.35); }
+  .chem-card.top::before {
+    content:'';
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at 50% 0%, rgba(240,165,0,0.06) 0%, transparent 70%);
+    pointer-events:none;
+  }
+  .chem-rank { font-size:22px; margin-bottom:8px; }
+  .chem-names { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; color:var(--text); margin-bottom:4px; }
+  .chem-score-bar-wrap { display:flex; align-items:center; gap:8px; margin:10px 0 8px; }
+  .chem-score-bar-bg { flex:1; height:6px; background:rgba(240,165,0,0.1); border-radius:3px; overflow:hidden; }
+  .chem-score-bar-fill { height:100%; border-radius:3px; background:linear-gradient(90deg,#25D366,#f0a500); transition:width 0.6s ease; }
+  .chem-score-label { font-family:'Syne',sans-serif; font-size:13px; font-weight:700; color:var(--amber); min-width:36px; text-align:right; }
+  .chem-signals { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
+  .chem-signal { font-size:11px; padding:3px 9px; border-radius:20px; background:rgba(37,211,102,0.08); color:var(--muted); }
+  /* heatmap */
+  .heatmap-table { border-collapse:collapse; width:100%; font-size:11px; }
+  .heatmap-table th { padding:6px 10px; color:var(--muted); font-weight:500; text-align:center; white-space:nowrap; }
+  .heatmap-table th.row-header { text-align:right; padding-right:12px; }
+  .heatmap-table td { min-width:28px; height:32px; text-align:center; border-radius:6px; font-family:'Syne',sans-serif; font-weight:700; font-size:12px; transition:opacity 0.2s; cursor:default; }
+  .heatmap-table td.self { background:rgba(255,255,255,0.03)!important; color:var(--muted)!important; font-size:10px; }
+
+
+  /* WORD CLOUD */
+  .word-cloud { display:flex; flex-wrap:wrap; gap:8px; padding:4px 0; min-height:60px; align-items:center; }
+  .word-tag {
+    display:inline-flex; align-items:center; gap:5px;
+    padding:5px 12px; border-radius:20px;
+    background:var(--bg3); border:1px solid var(--border2);
+    cursor:default; transition:all 0.15s; white-space:nowrap;
+    font-family:'DM Sans',sans-serif;
+  }
+  .word-tag:hover { border-color:var(--border); background:var(--card); }
+  .word-tag .wtxt { font-weight:500; color:var(--text); }
+  .word-tag .wct { font-size:11px; color:var(--muted); }
+  /* Word tabs */
+  .word-tabs { display:flex; flex-wrap:wrap; gap:6px; }
+  .word-tab {
+    padding:5px 14px; border-radius:20px; font-size:12px;
+    cursor:pointer; border:1px solid var(--border2);
+    background:transparent; color:var(--muted);
+    font-family:'DM Sans',sans-serif; transition:all 0.15s;
+  }
+  .word-tab:hover { border-color:var(--border); color:var(--text); }
+  .word-tab.active { color:#0a0f0d; font-weight:600; border-color:transparent; }
+
+</style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.998 2C6.479 2 2 6.479 2 12c0 1.85.505 3.585 1.383 5.074L2 22l5.062-1.371C8.464 21.505 10.197 22 12 22c5.521 0 10-4.479 10-10S17.521 2 11.998 2z" fill="none" stroke="currentColor" stroke-width="0.5"/></svg>
+      </div>
+      <span class="logo-text">Chat<em>Scope</em></span>
+    </div>
+    <div class="badge-privacy">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      100% private — runs in your browser
+    </div>
+  </header>
+
+  <div class="hero">
+    <h1>Who's really<br><em>running</em> the chat?</h1>
+    <p>Drop your WhatsApp export and get a full breakdown of who's spamming, swearing, and sending nothing but "ok".</p>
+  </div>
+
+  <div class="how-strip">
+    <div class="icon">📱</div>
+    <div>
+      <strong>How to export your chat</strong>
+      <p>Open any WhatsApp chat → tap ⋮ (three dots) → More → Export chat → Without Media → Save or share the .txt file, then drop it below.</p>
+    </div>
+  </div>
+
+  <div class="upload-section">
+    <div id="dropzone">
+      <div class="drop-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <h3>Drop your .txt file here</h3>
+      <p>Drag and drop your exported WhatsApp chat file</p>
+      <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Browse file
+      </button>
+      <input type="file" id="fileInput" accept=".txt">
+    </div>
+
+    <div class="divider">or paste raw chat text</div>
+
+    <textarea id="chatInput" placeholder="12/05/2024, 10:32 am - Riya: hey what's up 😂&#10;12/05/2024, 10:33 am - Karan: nothing much lol&#10;12/05/2024, 10:34 am - Priya: ok&#10;..."></textarea>
+
+    <div class="action-row">
+      <button class="btn-primary" onclick="analyse()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analyse Chat
+      </button>
+      <button class="btn-ghost" onclick="loadSample()">Load sample</button>
+      <button class="btn-ghost" onclick="clearAll()">Clear</button>
+    </div>
+
+    <div class="error-box" id="error"></div>
+  </div>
+
+  <div id="results">
+
+    <p class="section-title">Overview</p>
+    <div class="stat-grid" id="overviewGrid"></div>
+
+    <p class="section-title" style="margin-top:32px">Per-person breakdown</p>
+    <div class="person-grid" id="personGrid"></div>
+
+    <p class="section-title" style="margin-top:32px">Charts</p>
+    <div class="charts-grid">
+      <div class="chart-card">
+        <h3>Messages sent</h3>
+        <div style="position:relative;height:220px"><canvas id="c1" role="img" aria-label="Messages sent per person"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Emojis vs foul words</h3>
+        <div style="position:relative;height:220px"><canvas id="c2" role="img" aria-label="Emoji and foul words per person"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Media &amp; stickers</h3>
+        <div style="position:relative;height:220px"><canvas id="c3" role="img" aria-label="Media shared per person"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Filler replies ranking</h3>
+        <div id="fillerBoard" class="leaderboard"></div>
+      </div>
+    </div>
+
+  <p class="section-title" style="margin-top:32px">Chemistry ❤️</p>
+  <div id="chemistrySection">
+    <div id="chemPodium" style="margin-bottom:16px"></div>
+    <div class="charts-grid" style="grid-template-columns:1fr 1fr;margin-top:0">
+      <div class="chart-card" style="grid-column:1/3">
+        <h3>Reply affinity heatmap — who talks to whom most</h3>
+        <div id="chemHeatmap" style="overflow-x:auto"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="section-title" style="margin-top:32px">Most used words 💬</p>
+  <div id="wordSection">
+    <div class="chart-card" style="margin-bottom:14px">
+      <h3>Top words across the whole chat</h3>
+      <div id="globalWordCloud" class="word-cloud"></div>
+    </div>
+    <div class="chart-card">
+      <h3>Top words per person</h3>
+      <div id="personWordTabs" class="word-tabs"></div>
+      <div id="personWordCloud" class="word-cloud" style="margin-top:14px"></div>
+    </div>
+  </div>
+
+  <!-- SHARE BUTTONS -->
+  <div style="text-align:center;margin:40px 0 8px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+    <button class="btn-share" id="shareBtn" onclick="generateShareCard()">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+      Share as Image
+    </button>
+    <button class="btn-share" id="pdfBtn" onclick="generatePDF()" style="border-color:var(--blue);color:var(--blue)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      Export PDF Report
+    </button>
+  </div>
+
+  <!-- SHARE MODAL -->
+  <div id="shareModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:1000;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#111a16;border:1px solid rgba(37,211,102,0.2);border-radius:20px;padding:24px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <span style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700">Your chat card</span>
+        <button onclick="closeModal()" style="background:none;border:none;color:#6b9a7a;cursor:pointer;font-size:20px;line-height:1">✕</button>
+      </div>
+      <div id="shareCardWrap" style="border-radius:12px;overflow:hidden;margin-bottom:16px"></div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-primary" style="flex:1" onclick="downloadCard()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Download PNG
+        </button>
+        <button class="btn-ghost" onclick="closeModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <footer>
+    Built with ❤️ — your chat data never leaves your device.<br>
+    <strong>ChatScope</strong> · WhatsApp Chat Analyser
+  </footer>
+</div>
+
+<script>
+// ─── FOUL WORD DETECTION ────────────────────────────────────────────────────
+// Strategy: canonical root forms. Fuzzy normaliser maps spelling variants
+// to these roots before lookup, so "bhenchod / bnchd / benchod" all hit "bhenchod".
+
+const FOUL_ROOTS = new Set([
+  // English
+  'fuck','shit','ass','bitch','bastard','crap','cunt','dick','piss',
+  'bollocks','arse','moron','dumbass','motherfucker','asshole','bullshit',
+  'goddamn','jackass','dipshit','douchebag','wanker','twat','tosser','prick',
+  // Abbreviations / censored
+  'wtf','stfu','gtfo','fu','mf','sob',
+  // Hindi/Hinglish — core
+  'madarchod','madarchod','mc','maderchod','maderchot','madarchot',
+  'bhenchod','bc','benchod','bhnchd','bnchd','behenchod',
+  'chutiya','chutiye','chutiyapa','chutiyagiri','choot','chut',
+  'gaandu','gandu','gaand','gand','gaandfat','gandfatu',
+  'bhosdike','bhosdiki','bhosdi','bhosd','bsdk','bsdke',
+  'lund','lavde','lawde','laude','lode','lund',
+  'randi','raand','rand',
+  'haramzada','haramkhor','harami','haram',
+  'kutta','kutte','kutiya','kutiye',
+  'kamina','kamine','kamini',
+  'sala','saala','saaley','saley','sale',
+  'ullu','ullupanti',
+  'bakwaas','bakwas','baqwaas',
+  'chod','chodna','chodo',
+  'maa','teri maa','teri','behen','behn',
+  'bhadwa','bhadwe','bhadwi',
+  'gashti','gasti',
+  'besharam','nalaayak','nalayak','nikamma',
+  'madar','madarjaat','madarjat',
+  'tatti','tattu',
+  'hijra','hijda',
+  'randwa','randve','randwa',
+  'chakka',
+  'suwar','suar','saala suar',
+  // Marathi / regional
+  'zavlya','zavadya','zav',
+  'aai','aaichi','ghanta','ghante',
+  'fattya',
+  // Compound shortcuts people actually type
+  'mkg','mkc','bkl','bklol','teri maa ki','tmkc','tmk',
+]);
+
+// Normaliser: strips noise, maps common alternate spellings to a canonical form
+function normalise(raw) {
+  let w = raw.toLowerCase();
+  // strip punctuation except letters, digits, spaces
+  w = w.replace(/[^a-z0-9\s]/g, '');
+  w = w.trim();
+
+  // Common censored-form restoration: f**k → fuck, ch***ya → chutiya
+  w = w.replace(/f[\*x_]+k/g, 'fuck');
+  w = w.replace(/sh[\*x_]+t/g, 'shit');
+  w = w.replace(/b[\*x_]+tch/g, 'bitch');
+  w = w.replace(/c[\*x_]+nt/g, 'cunt');
+  w = w.replace(/ch[\*x_]+t(iya|ya|iye)?/g, 'chutiya');
+  w = w.replace(/bh[\*x_]+nchod/g, 'bhenchod');
+  w = w.replace(/m[\*x_]+derch/g, 'madarchod');
+
+  // Phonetic normalisations — map common variant spellings
+  const map = [
+    [/madarch[ao]d|maderch[ao]d|madarch[ao]t/g, 'madarchod'],
+    [/bhench[ao]d|benchod|behnchod|bhnchd|bnchd/g, 'bhenchod'],
+    [/chutiy[ae]|ch[uo]tiy[ae]|chootiy[ae]/g, 'chutiya'],
+    [/bhosdik[ei]|bhosd[i]?k[ei]|bsdk[e]?|bhosdi/g, 'bhosdike'],
+    [/gaand[u]?|gandu|gaandu/g, 'gaandu'],
+    [/l[ao]ude|lavde|lawde|lauda|lode/g, 'lavde'],
+    [/sala[a]?|saaley|saley|sale(?!s)/g, 'sala'],
+    [/kamin[aei]|kamini/g, 'kamina'],
+    [/kutt[ae]|kutiya/g, 'kutta'],
+    [/haramzad[ae]|haramkh[ao]r/g, 'haramzada'],
+    [/randw[ae]|raand|rand(?!om)/g, 'randi'],
+    [/bakw[ao][ao]s|baqwaas/g, 'bakwaas'],
+    [/madarjaa?t/g, 'madarjaat'],
+    [/nalaayak|nalayak/g, 'nalaayak'],
+    [/bhadw[aei]/g, 'bhadwa'],
+    [/ghant[ae]/g, 'ghanta'],
+    [/mkg|mkc|tmkc|tmk/g, 'madarchod'],
+    [/bkl(?:ol)?/g, 'bklol'],
+  ];
+  for (const [re, canon] of map) w = w.replace(re, canon);
+  return w;
+}
+
+// Fuzzy foul check: normalise the raw token, then check root set.
+// Also checks if any FOUL_ROOT is a substring of the normalised word
+// (catches "chutiyapanti", "madarchod123", etc.)
+function isFoulWord(rawToken) {
+  const n = normalise(rawToken);
+  if (FOUL_ROOTS.has(n)) return true;
+  // substring match for compound/suffixed forms
+  for (const root of FOUL_ROOTS) {
+    if (root.length >= 3 && n.includes(root)) return true;
+  }
+  return false;
+}
+
+// Count foul hits in a full message (not just per-word, catches multi-word phrases)
+function countFoulInMsg(text) {
+  // Per-word pass
+  const words = text.split(/\s+/).filter(Boolean);
+  let count = words.filter(isFoulWord).length;
+  // Bigram pass for two-word phrases like "teri maa", "saala kutta"
+  const normWords = words.map(w => normalise(w));
+  for (let i = 0; i < normWords.length - 1; i++) {
+    const bigram = normWords[i] + ' ' + normWords[i+1];
+    if (FOUL_ROOTS.has(bigram)) count++;
+  }
+  return count;
+}
+
+// ─── FILLER DETECTION ────────────────────────────────────────────────────────
+const FILLER_SET = new Set([
+  // English
+  'ok','okay','k','sure','fine','nice','cool','wow','lol','lmao','rofl',
+  'haha','hehe','hihi','hahahaha','lolol','lmaooo',
+  'hmm','hm','uh','um','oh','ah','ohh','ahh','ohhh',
+  'yeah','ya','yep','yup','yes','nope','nah','no',
+  'noted','ik','idk','omg','omgg','wtf','lol',
+  'okay','okk','okkk','okayy',
+  'true','same','facts','mood','valid',
+  'nice','noice','lit','fire','dope',
+  'brb','gtg','ttyl','afk',
+  // Hindi/Hinglish fillers
+  'acha','accha','achha','achi',
+  'haan','han','haa','hna','ha',
+  'nahi','nhi','nah','nahin','nope',
+  'theek','thik','theek hai','thik hai',
+  'bas','bss','bas yaar',
+  'arre','arrey','are','arey',
+  'chal','chalo','chall',
+  'bhai','bhai log','yaar','yr','yar',
+  'sahi','shi','sahi hai',
+  'bilkul','bilkull',
+  'dekh','dekho',
+  'bol','bolo',
+  'abhi','abhi aata','coming',
+  'matlab','mtlb',
+  'waise','aise',
+  'seedha','sidha',
+  'pakka','pakki','pucca',
+  'kyun','kyu','kyunki','kyuki',
+  'kya','kyu','kaisa','kaisi',
+  'lol haan','haan lol',
+  'ji','jii','ji haan','ji han',
+  'haina','hain na','hai na',
+  'na','naa',
+]);
+
+// ─── FILLER MESSAGE CHECK ─────────────────────────────────────────────────────
+function isFiller(msg) {
+  const clean = msg.trim().toLowerCase().replace(/[^a-z0-9\s]/g, '').trim();
+  const words = clean.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return true; // empty/emoji-only
+  if (words.length > 5) return false;
+  // all tokens must be in filler set (or be a single emoji-stripped empty)
+  return words.every(w => FILLER_SET.has(w) || w === '');
+}
+
+// ─── REST ─────────────────────────────────────────────────────────────────────
+const COLORS = ['#25D366','#4a9eff','#f0a500','#ff5a5a','#b57bee','#1abc9c','#ff8c42','#5dade2'];
+
+function getInitials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+function countEmojis(t){return(t.match(/\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu)||[]).length;}
+function isMedia(t){return t.trim()==='<Media omitted>'||/media omitted/i.test(t);}
+
+function parseChat(raw){
+  // Strip \r (Windows/iOS CRLF exports) so line endings are clean
+  raw = raw.replace(/\r/g, '');
+  const lines = raw.split('\n');
+
+  // WhatsApp iOS uses U+202F (narrow no-break space) between date-comma and time.
+  // \s in JS RegExp matches U+202F, so this works for both regular and narrow spaces.
+  // Handles: [DD/MM/YY, H:MM:SS AM] Name: text
+  //      and: DD/MM/YYYY, HH:MM am - Name: text  (Android)
+  const bracketRe = /^\[(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}),\s+(\d{1,2}:\d{2}(?::\d{2})?(?:\s*[AaPp][Mm])?)\]\s+([^:]+):\s*([\s\S]*)$/;
+  const dashRe    = /^(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})[,\s]+(\d{1,2}:\d{2}(?::\d{2})?(?:\s*[AaPp][Mm])?)\s*[-\u2013]\s+([^:]+):\s*(.+)$/;
+
+  const systemPhrases = [
+    'Messages and calls are end-to-end','created group','added you',
+    'added ','left','changed the subject','deleted this message',
+    'changed this group','security code','waiting for this message'
+  ];
+
+  // Join continuation lines onto the message they belong to
+  const joined = [];
+  for(const line of lines){
+    if(bracketRe.test(line) || dashRe.test(line)) joined.push(line);
+    else if(joined.length && line.trim()) joined[joined.length-1] += '\n' + line;
+  }
+
+  const msgs = [];
+  for(const line of joined){
+    const m = bracketRe.exec(line) || dashRe.exec(line);
+    if(!m) continue;
+    const sender = m[3].trim();
+    // Strip U+200E left-to-right mark WhatsApp prepends to system messages
+    const text = m[4].trim().replace(/^\u200e/, '').replace(/^\u200e/,'');
+    if(!text) continue;
+    if(systemPhrases.some(p => text.startsWith(p))) continue;
+    // Skip group name as sender (system notification lines)
+    msgs.push({date:m[1], time:m[2], sender, text});
+  }
+  return msgs;
+}
+
+const dropzone=document.getElementById('dropzone');
+const fileInput=document.getElementById('fileInput');
+
+dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('drag-over');});
+dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop',e=>{
+  e.preventDefault();
+  dropzone.classList.remove('drag-over');
+  const f=e.dataTransfer.files[0];
+  if(f&&f.name.endsWith('.txt')){
+    const r=new FileReader();
+    r.onload=ev=>{document.getElementById('chatInput').value=ev.target.result;};
+    r.readAsText(f);
+  }
+});
+fileInput.addEventListener('change',e=>{
+  const f=e.target.files[0];
+  if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{document.getElementById('chatInput').value=ev.target.result;};
+  r.readAsText(f);
+});
+
+function loadSample(){
+  document.getElementById('chatInput').value=`12/05/2024, 10:32 am - Riya: hey what's up 😂😂
+12/05/2024, 10:33 am - Karan: nothing much lol haha
+12/05/2024, 10:34 am - Riya: wanna catch up tonight? 🙌🔥
+12/05/2024, 10:35 am - Karan: sure why not bro
+12/05/2024, 10:36 am - Priya: ok
+12/05/2024, 10:37 am - Karan: that movie was fucking amazing dude
+12/05/2024, 10:38 am - Riya: omg yes!! 😍😍😍
+12/05/2024, 10:39 am - Priya: haha
+12/05/2024, 10:40 am - Karan: <Media omitted>
+12/05/2024, 10:41 am - Riya: lol shit I forgot my keys again 😂
+12/05/2024, 10:42 am - Priya: 😂😂
+12/05/2024, 10:43 am - Karan: dude bsdk ye tera kaam tha
+12/05/2024, 10:44 am - Riya: arrey hn hn relax karo yaar
+12/05/2024, 10:45 am - Priya: acha acha sahi hai
+12/05/2024, 10:46 am - Karan: bnchd teri wajah se aaj late ho gaye
+12/05/2024, 10:47 am - Riya: chal chal kamine maafi 😂🙏
+12/05/2024, 10:48 am - Priya: ok 👍
+12/05/2024, 10:49 am - Karan: yaar ye bakwaas band karo seriously
+12/05/2024, 10:50 am - Riya: 😂😂😂 haan bhai sahi bol raha hai
+12/05/2024, 10:51 am - Priya: haan na
+12/05/2024, 10:52 am - Karan: tmkc itni der kyun lagi reply karne mein
+12/05/2024, 10:53 am - Riya: arre pakka nahi tha meeting ka!! 🙌
+12/05/2024, 10:54 am - Priya: theek hai
+12/05/2024, 10:55 am - Karan: chal chalo definitely kal milte hain
+12/05/2024, 10:56 am - Riya: awesome see you guys!! 😊✨🎉`;
+}
+
+function clearAll(){
+  document.getElementById('chatInput').value='';
+  document.getElementById('results').style.display='none';
+  document.getElementById('error').style.display='none';
+  destroyCharts();
+}
+
+let charts=[];
+function destroyCharts(){charts.forEach(c=>c.destroy());charts=[];}
+
+function analyse(){
+  const raw=document.getElementById('chatInput').value.trim();
+  const errEl=document.getElementById('error');
+  errEl.style.display='none';
+  if(!raw){errEl.textContent='Please paste or upload a WhatsApp chat export first.';errEl.style.display='block';return;}
+  const msgs=parseChat(raw);
+  if(msgs.length<2){errEl.textContent="Couldn't parse this chat. Make sure it's a WhatsApp export like: \"12/05/2024, 10:32 am - Name: message\"";errEl.style.display='block';return;}
+
+  const stats={};
+  for(const m of msgs){
+    if(!stats[m.sender])stats[m.sender]={messages:0,words:0,emojis:0,foul:0,media:0,filler:0,chars:0};
+    const s=stats[m.sender];
+    s.messages++;
+    s.emojis+=countEmojis(m.text);
+    if(isMedia(m.text)){s.media++;}
+    else{
+      const words=m.text.split(/\s+/).filter(Boolean);
+      s.words+=words.length;
+      s.chars+=m.text.length;
+      s.foul+=countFoulInMsg(m.text);
+      if(isFiller(m.text))s.filler++;
+    }
+  }
+
+  currentMsgs = msgs;
+  renderResults(stats,msgs.length,msgs);
+}
+
+function renderResults(stats,total,msgs){
+  if(msgs) renderChemistry(msgs);
+  currentStats=stats;
+  currentTotal=total;
+  destroyCharts();
+  const people=Object.entries(stats).sort((a,b)=>b[1].messages-a[1].messages);
+  const maxMsgs=Math.max(...people.map(p=>p[1].messages));
+  const totalEmoji=people.reduce((a,p)=>a+p[1].emojis,0);
+  const totalFoul=people.reduce((a,p)=>a+p[1].foul,0);
+
+  // overview
+  document.getElementById('overviewGrid').innerHTML=`
+    <div class="stat-card"><div class="label">Messages</div><div class="value">${total}</div></div>
+    <div class="stat-card"><div class="label">Participants</div><div class="value">${people.length}</div></div>
+    <div class="stat-card"><div class="label">Total emojis</div><div class="value">${totalEmoji}</div></div>
+    <div class="stat-card"><div class="label">Foul words</div><div class="value" style="color:${totalFoul>0?'var(--danger)':'var(--text)'}">${totalFoul}</div></div>
+  `;
+
+  const crownMsg=people[0][0];
+  const crownEmoji=[...people].sort((a,b)=>b[1].emojis-a[1].emojis)[0][0];
+  const crownFoul=[...people].sort((a,b)=>b[1].foul-a[1].foul)[0][0];
+  const crownFiller=[...people].sort((a,b)=>b[1].filler-a[1].filler)[0][0];
+
+  // person cards
+  const pHTML=people.map(([name,s],i)=>{
+    const color=COLORS[i%COLORS.length];
+    const pct=Math.round(s.messages/maxMsgs*100);
+    const avg=(s.chars/Math.max(s.messages,1)).toFixed(1);
+    const crowns=[];
+    if(name===crownMsg)crowns.push({label:'Most Active',cls:'crown-green'});
+    if(name===crownEmoji&&s.emojis>0)crowns.push({label:'Emoji King 👑',cls:'crown-amber'});
+    if(name===crownFoul&&s.foul>0)crowns.push({label:'Sailor Mouth 🤬',cls:'crown-red'});
+    if(name===crownFiller&&s.filler>0)crowns.push({label:'Filler Champ',cls:'crown-blue'});
+    return `<div class="person-card">
+      <div class="person-head">
+        <div class="avatar" style="background:${color}22;color:${color}">${getInitials(name)}</div>
+        <div>
+          <div class="person-name">${name}</div>
+          <div class="person-sub">${s.messages} messages · ${Math.round(s.messages/total*100)}% of chat</div>
+        </div>
+      </div>
+      ${crowns.length?`<div class="crown-row">${crowns.map(c=>`<span class="crown ${c.cls}">${c.label}</span>`).join('')}</div>`:``}
+      <div class="prog-bar"><div class="prog-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="stat-row"><span class="key">✦ Avg msg length</span><span class="val">${avg} chars</span></div>
+      <div class="stat-row"><span class="key">😄 Emojis used</span><span class="val">${s.emojis}</span></div>
+      <div class="stat-row"><span class="key">🤬 Foul words</span><span class="val ${s.foul>0?'val-danger':''}">${s.foul}</span></div>
+      <div class="stat-row"><span class="key">📸 Media shared</span><span class="val">${s.media}</span></div>
+      <div class="stat-row"><span class="key">💬 Filler replies</span><span class="val">${s.filler}</span></div>
+    </div>`;
+  }).join('');
+  document.getElementById('personGrid').innerHTML=pHTML;
+
+  // charts
+  const names=people.map(p=>p[0]);
+  const chartOpts=(indexAxis)=>({
+    indexAxis,
+    responsive:true,
+    maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#6b9a7a',font:{size:11}}},
+      y:{grid:{display:false},ticks:{color:'#6b9a7a',font:{size:11}}}
+    }
+  });
+
+  charts.push(new Chart(document.getElementById('c1'),{
+    type:'bar',
+    data:{labels:names,datasets:[{label:'Messages',data:people.map(p=>p[1].messages),backgroundColor:people.map((_,i)=>COLORS[i%COLORS.length]),borderRadius:5}]},
+    options:chartOpts('y')
+  }));
+
+  charts.push(new Chart(document.getElementById('c2'),{
+    type:'bar',
+    data:{labels:names,datasets:[
+      {label:'Emojis',data:people.map(p=>p[1].emojis),backgroundColor:'#25D366',borderRadius:5},
+      {label:'Foul',data:people.map(p=>p[1].foul),backgroundColor:'#ff5a5a',borderRadius:5}
+    ]},
+    options:{...chartOpts('y'),plugins:{legend:{display:true,labels:{color:'#6b9a7a',font:{size:11},boxWidth:10,boxHeight:10}}}}
+  }));
+
+  charts.push(new Chart(document.getElementById('c3'),{
+    type:'bar',
+    data:{labels:names,datasets:[{label:'Media',data:people.map(p=>p[1].media),backgroundColor:'#4a9eff',borderRadius:5}]},
+    options:chartOpts('y')
+  }));
+
+  // filler leaderboard
+  const sorted=[...people].sort((a,b)=>b[1].filler-a[1].filler);
+  document.getElementById('fillerBoard').innerHTML=sorted.map(([name,s],i)=>{
+    const medal=i===0?'🥇':i===1?'🥈':i===2?'🥉':'#'+(i+1);
+    const rankCls=i===0?'lb-rank gold':'lb-rank';
+    return '<div class="lb-row">'
+      +'<span class="'+rankCls+'">'+medal+'</span>'
+      +'<span class="lb-name">'+name+'</span>'
+      +'<span class="lb-val">'+s.filler+' fillers</span>'
+      +'</div>';
+  }).join('');
+
+  if(msgs) renderWordSection(msgs);
+  document.getElementById('results').style.display='block';
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+
+
+// ─── WORD FREQUENCY ENGINE ───────────────────────────────────────────────────
+
+// Stop words — common words to exclude (English + Hinglish)
+const STOP_WORDS = new Set([
+  // English
+  'the','a','an','and','or','but','in','on','at','to','for','of','with',
+  'is','it','its','be','was','are','were','been','being','have','has','had',
+  'do','does','did','will','would','could','should','may','might','shall',
+  'this','that','these','those','i','me','my','myself','we','our','you',
+  'your','he','him','his','she','her','they','them','their','what','which',
+  'who','whom','when','where','why','how','all','each','every','both',
+  'few','more','most','other','some','such','no','not','only','same',
+  'so','than','too','very','just','also','there','then','than','into',
+  'up','out','if','about','after','before','between','through','during',
+  'by','from','as','am','get','got','go','going','come','came','know',
+  'think','see','look','want','make','take','like','use','say','said',
+  'even','back','good','new','first','last','long','little','own','right',
+  'big','great','next','early','young','important','public','private',
+  'real','best','free','tell','put','keep','let','seem','help','talk',
+  'turn','start','show','hear','play','run','move','live','believe',
+  'hold','bring','happen','write','provide','sit','stand','lose','pay',
+  'meet','include','continue','set','learn','change','lead','understand',
+  'watch','follow','stop','create','speak','read','spend','grow','open',
+  'walk','win','offer','remember','love','consider','appear','buy','wait',
+  'serve','die','send','expect','build','stay','fall','cut','reach','kill',
+  'remain','suggest','raise','pass','sell','require','report','decide',
+  'pull','because','while','though','although','however','therefore',
+  'already','still','again','once','never','always','often','sometimes',
+  'usually','really','actually','probably','definitely','maybe','perhaps',
+  'can','cannot','cant','wont','dont','doesnt','didnt','wasnt','werent',
+  'isnt','arent','havent','hasnt','hadnt','wouldnt','couldnt','shouldnt',
+  'im','ive','id','ill','youre','youve','youd','youll','hes','shes',
+  'theyre','theyve','weve','were','itll','itd','thats','whats','whos',
+  // Chat abbreviations (already counted elsewhere or meaningless alone)
+  'ok','okay','haha','lol','lmao','hehe','hmm','oh','ah','yeah','ya',
+  'yep','yup','yes','no','nope','hey','hi','hello','bye','yes','na',
+  'k','ur','r','u','n','b','2','4','da','de','di','ha','he',
+  // Hinglish particles / connectives
+  'hai','hain','tha','thi','the','ho','hoga','hogi','hoge',
+  'ka','ki','ke','ko','se','ne','me','mein','par','pe','tak',
+  'aur','ya','lekin','toh','to','na','nahi','nhi','haan','han',
+  'bhi','sirf','hi','woh','wo','yeh','ye','jo','jab','kab',
+  'kya','kaisa','kaisi','kaise','kyun','kyu','kaise','idhar','udhar',
+  'yahan','wahan','abhi','tab','phir','fir','agar','jaise','waisa',
+  'sab','kuch','bahut','thoda','zyada','kam','pehle','baad','saath',
+  'mere','mera','meri','tera','teri','tere','uska','uski','unka',
+  'apna','apni','apne','hamara','hamari','tumhara','tumhari',
+  'mai','mujhe','tumhe','use','unhe','inhe','koi','kuch','sab',
+  'hum','tum','aap','woh','ye','jo','jis','jab','tab',
+  'bhai','yr','yaar','bro','dude','boss','sir','re','be',
+  'bol','kar','kr','de','le','aa','ja','reh',
+  'tha','thi','hoga','hogi','rha','rhe','rhi',
+  'kra','kro','karna','karke','karke','karke',
+  // WhatsApp system/media words to exclude
+  'omitted','sticker','image','audio','video','gif','deleted','message',
+  'edited','media','file','document','contact',
+  // Common name suffixes that pollute results
+  'iitb','iit','nit',
+  // Short noise
+  'hai','nahi','abhi','wala','wali','wale','liya','liye','lena','dena',
+  'gaya','gayi','gaye','aaya','aayi','aaye','hua','hui','hue',
+  'raha','rahi','rahe','laga','lagi','lage',
+]);
+
+function tokenize(text) {
+  // Lowercase, strip URLs, mentions, special chars, split
+  return text
+    .toLowerCase()
+    .replace(/https?:\/\/\S+/g,'')          // URLs
+    .replace(/@\S+/g,'')                     // mentions
+    .replace(/<[^>]+>/g,'')                  // HTML / WA tags
+    .replace(/[\u200e\u200f\u200b]/g,'')     // zero-width chars
+    .replace(/[^\p{L}\p{N}\s]/gu,' ')        // keep only letters, numbers
+    .split(/\s+/)
+    .filter(w => w.length >= 3 && !STOP_WORDS.has(w) && !/^\d+$/.test(w));
+}
+
+function topWords(tokens, n=20) {
+  const freq = {};
+  tokens.forEach(w => freq[w] = (freq[w]||0) + 1);
+  return Object.entries(freq)
+    .sort((a,b) => b[1]-a[1])
+    .slice(0, n)
+    .map(([word, count]) => ({word, count}));
+}
+
+let currentWordData = null;  // {global: [], perPerson: {name: []}}
+
+function computeWordFreq(msgs) {
+  // Build a dynamic blocklist of all participant name tokens
+  // so "kaafir", "bhavit", "parth" etc. don't show up in word clouds
+  const nameTokens = new Set();
+  [...new Set(msgs.map(m=>m.sender))].forEach(name => {
+    name.toLowerCase()
+      .replace(/[^a-z\s]/g,' ')
+      .split(/\s+/)
+      .filter(w => w.length >= 2)
+      .forEach(w => nameTokens.add(w));
+  });
+
+  const globalTokens = [];
+  const perPerson = {};
+  for (const m of msgs) {
+    if (isMedia(m.text)) continue;
+    const tokens = tokenize(m.text).filter(w => !nameTokens.has(w));
+    globalTokens.push(...tokens);
+    if (!perPerson[m.sender]) perPerson[m.sender] = [];
+    perPerson[m.sender].push(...tokens);
+  }
+  const result = {
+    global: topWords(globalTokens, 30),
+    perPerson: {}
+  };
+  for (const [name, tokens] of Object.entries(perPerson)) {
+    result.perPerson[name] = topWords(tokens, 15);
+  }
+  currentWordData = result;
+  return result;
+}
+
+function renderWordCloud(words, container, color='#25D366') {
+  if (!words || words.length === 0) {
+    container.innerHTML = '<span style="color:var(--muted);font-size:13px">Not enough data.</span>';
+    return;
+  }
+  const maxCount = words[0].count;
+  container.innerHTML = words.map(({word, count}) => {
+    const t = count / maxCount;
+    // Font size: 11px–22px based on frequency
+    const size = Math.round(11 + t * 11);
+    // Opacity: 0.5–1
+    const opacity = (0.45 + t * 0.55).toFixed(2);
+    // Background tint
+    const alpha = (0.05 + t * 0.12).toFixed(2);
+    return `<span class="word-tag" style="font-size:${size}px;opacity:${opacity};border-color:${color}${Math.round(t*60+10).toString(16).padStart(2,'0')}">
+      <span class="wtxt" style="color:${color}">${word}</span>
+      <span class="wct">${count}</span>
+    </span>`;
+  }).join('');
+}
+
+let activeWordTab = null;
+
+function renderWordSection(msgs) {
+  const data = computeWordFreq(msgs);
+  // Global cloud
+  renderWordCloud(data.global, document.getElementById('globalWordCloud'), '#25D366');
+
+  // Person tabs
+  const people = Object.keys(data.perPerson);
+  const COLORS_W = ['#25D366','#4a9eff','#f0a500','#ff5a5a','#b57bee','#1abc9c','#ff8c42','#5dade2'];
+  const tabsEl = document.getElementById('personWordTabs');
+  const cloudEl = document.getElementById('personWordCloud');
+
+  tabsEl.innerHTML = people.map((name, i) => {
+    const shortN = name.replace(/ IITB$/i,'').replace(/ IIT$/i,'').split(' ')[0];
+    const color = COLORS_W[i % COLORS_W.length];
+    return `<button class="word-tab" data-name="${name}" data-color="${color}" 
+      style="--tab-color:${color}"
+      onclick="selectWordTab(this,'${name}','${color}')">${shortN}</button>`;
+  }).join('');
+
+  // Auto-select first tab
+  if (people.length > 0) {
+    const firstTab = tabsEl.querySelector('.word-tab');
+    selectWordTab(firstTab, people[0], COLORS_W[0]);
+  }
+}
+
+function selectWordTab(el, name, color) {
+  // Update tab styles
+  document.querySelectorAll('.word-tab').forEach(t => {
+    t.classList.remove('active');
+    t.style.background = 'transparent';
+    t.style.color = 'var(--muted)';
+    t.style.borderColor = 'var(--border2)';
+  });
+  el.classList.add('active');
+  el.style.background = color;
+  el.style.color = '#0a0f0d';
+  el.style.borderColor = color;
+  // Render cloud
+  if (currentWordData && currentWordData.perPerson[name]) {
+    renderWordCloud(currentWordData.perPerson[name], document.getElementById('personWordCloud'), color);
+  }
+}
+
+// ─── CHEMISTRY ENGINE ────────────────────────────────────────────────────────
+let currentMsgs = [];  // store full message list for chemistry calc
+
+function computeChemistry(msgs) {
+  // Build pair interaction matrix
+  // For every message, check previous message — if different sender, that's a reply interaction
+  const pairs = {};   // "A|||B" -> { replies, emojiReplies, avgGap, gapCount, quickReplies }
+  const senders = [...new Set(msgs.map(m => m.sender))];
+
+  function pairKey(a, b) {
+    return [a, b].sort().join('|||');
+  }
+  function getPair(a, b) {
+    const k = pairKey(a, b);
+    if (!pairs[k]) pairs[k] = { a: [a,b].sort()[0], b: [a,b].sort()[1], replies: 0, emojiReplies: 0, quickReplies: 0, totalGapMs: 0, gapCount: 0, mediaShares: 0 };
+    return pairs[k];
+  }
+
+  // Parse times for gap calculation
+  function parseTime(dateStr, timeStr) {
+    try {
+      // timeStr like "1:17:45 PM" or "13:17"
+      const clean = (dateStr + ' ' + timeStr).replace(/\u202f/g,' ');
+      // Try building a date — DD/MM/YY format
+      const parts = dateStr.split(/[\/\-]/);
+      let d = parts[0], mo = parts[1], yr = parts[2];
+      if (yr && yr.length === 2) yr = '20' + yr;
+      const tParts = timeStr.trim().replace(/\s*([AaPp][Mm])/, ' $1').split(/[\s:]/);
+      let hh = parseInt(tParts[0]), mm = parseInt(tParts[1]), ss = parseInt(tParts[2]) || 0;
+      const ampm = timeStr.match(/[AaPp][Mm]/);
+      if (ampm) {
+        const ap = ampm[0].toUpperCase();
+        if (ap === 'PM' && hh !== 12) hh += 12;
+        if (ap === 'AM' && hh === 12) hh = 0;
+      }
+      return new Date(parseInt(yr), parseInt(mo)-1, parseInt(d), hh, mm, ss).getTime();
+    } catch(e) { return 0; }
+  }
+
+  for (let i = 1; i < msgs.length; i++) {
+    const cur = msgs[i];
+    const prev = msgs[i-1];
+    if (cur.sender === prev.sender) continue;  // same person, not a reply
+
+    const p = getPair(cur.sender, prev.sender);
+    p.replies++;
+
+    // Emoji reply? (cur message starts with or is mostly emojis)
+    if (countEmojis(cur.text) > 0 && cur.text.length < 12) p.emojiReplies++;
+
+    // Time gap
+    const t1 = parseTime(prev.date, prev.time);
+    const t2 = parseTime(cur.date, cur.time);
+    const gap = t2 - t1;
+    if (gap > 0 && gap < 3600000) {  // within 1 hour = valid reply gap
+      p.totalGapMs += gap;
+      p.gapCount++;
+      if (gap < 120000) p.quickReplies++;  // under 2 min = quick reply
+    }
+
+    // Media share to each other
+    if (isMedia(cur.text)) p.mediaShares++;
+  }
+
+  // Score each pair
+  const pairList = Object.values(pairs).filter(p => p.replies >= 2);
+
+  pairList.forEach(p => {
+    const avgGapMin = p.gapCount > 0 ? (p.totalGapMs / p.gapCount) / 60000 : 60;
+    // Speed score: faster avg reply = higher score (max 40 pts at <1min, 0 at 30min+)
+    const speedScore = Math.max(0, 40 - (avgGapMin * 1.3));
+    // Reply volume score (log-scaled, max 30)
+    const replyScore = Math.min(30, Math.log2(p.replies + 1) * 8);
+    // Quick replies bonus (max 20)
+    const quickScore = Math.min(20, p.quickReplies * 4);
+    // Emoji warmth (max 10)
+    const emojiScore = Math.min(10, p.emojiReplies * 2);
+
+    p.score = Math.round(speedScore + replyScore + quickScore + emojiScore);
+    p.avgGapMin = avgGapMin;
+    p.signals = [];
+    if (p.quickReplies >= 3) p.signals.push('⚡ Fast replies');
+    if (p.emojiReplies >= 2) p.signals.push('😄 Emoji warmth');
+    if (p.replies >= 10)     p.signals.push('💬 High traffic');
+    if (avgGapMin < 3)       p.signals.push('🔥 Instant vibes');
+    if (p.mediaShares >= 2)  p.signals.push('📸 Media sharing');
+  });
+
+  return pairList.sort((a, b) => b.score - a.score);
+}
+
+function renderChemistry(msgs) {
+  const pairs = computeChemistry(msgs);
+  const senders = [...new Set(msgs.map(m => m.sender))];
+  if (pairs.length === 0) {
+    document.getElementById('chemPodium').innerHTML = '<p style="color:var(--muted);font-size:13px;padding:12px 0">Not enough back-and-forth conversation to compute chemistry.</p>';
+    document.getElementById('chemHeatmap').innerHTML = '';
+    return;
+  }
+
+  const maxScore = pairs[0].score;
+  const medals = ['🥇','🥈','🥉'];
+  const shortName = n => n.replace(/ IITB$/i,'').replace(/ IIT$/i,'').split(' ')[0];
+
+  // Podium cards — top 6
+  const topPairs = pairs.slice(0, 6);
+  const podiumHTML = '<div class="chem-podium">' + topPairs.map((p, i) => {
+    const pct = Math.round((p.score / maxScore) * 100);
+    const nameA = shortName(p.a), nameB = shortName(p.b);
+    const signalHtml = p.signals.map(s => '<span class="chem-signal">'+s+'</span>').join('');
+    const gapStr = p.avgGapMin < 1 ? '<1 min' : Math.round(p.avgGapMin)+'m avg reply';
+    return '<div class="chem-card' + (i===0?' top':'') + '">'
+      + '<div class="chem-rank">' + (medals[i] || '💛') + '</div>'
+      + '<div class="chem-names">' + nameA + ' &amp; ' + nameB + '</div>'
+      + '<div style="font-size:12px;color:var(--muted);margin-bottom:6px">'
+      + p.replies + ' exchanges · ' + gapStr
+      + '</div>'
+      + '<div class="chem-score-bar-wrap">'
+      + '<div class="chem-score-bar-bg"><div class="chem-score-bar-fill" style="width:'+pct+'%"></div></div>'
+      + '<span class="chem-score-label">'+p.score+'</span>'
+      + '</div>'
+      + (signalHtml ? '<div class="chem-signals">'+signalHtml+'</div>' : '')
+      + '</div>';
+  }).join('') + '</div>';
+  document.getElementById('chemPodium').innerHTML = podiumHTML;
+
+  // Heatmap — reply matrix (no limit, scrollable for large groups)
+  if (senders.length < 2) {
+    document.getElementById('chemHeatmap').innerHTML = '<p style="color:var(--muted);font-size:12px">Need at least 2 participants.</p>';
+    return;
+  }
+
+  // Build reply count matrix[from][to]
+  const matrix = {};
+  senders.forEach(a => { matrix[a] = {}; senders.forEach(b => matrix[a][b] = 0); });
+  for (let i = 1; i < msgs.length; i++) {
+    const cur = msgs[i], prev = msgs[i-1];
+    if (cur.sender !== prev.sender) matrix[cur.sender][prev.sender]++;
+  }
+
+  const allVals = [];
+  senders.forEach(a => senders.forEach(b => { if (a!==b) allVals.push(matrix[a][b]); }));
+  const maxVal = Math.max(...allVals, 1);
+
+  function heatColor(val, isSelf) {
+    if (isSelf) return 'rgba(255,255,255,0.03)';
+    const t = val / maxVal;
+    // dark green → bright green gradient
+    const r = Math.round(10 + t * 20);
+    const g = Math.round(40 + t * 170);
+    const b = Math.round(20 + t * 60);
+    return 'rgba('+r+','+g+','+b+','+(0.15 + t*0.75)+')';
+  }
+  function textColor(val, isSelf) {
+    if (isSelf) return 'var(--muted)';
+    const t = val / maxVal;
+    return t > 0.4 ? '#e8f5ee' : '#6b9a7a';
+  }
+
+  const cellSize = senders.length > 12 ? 28 : senders.length > 8 ? 36 : 48;
+  const fontSize = senders.length > 12 ? 9 : 11;
+  const shortSenders = senders.map(shortName);
+  let table = '<div style="overflow-x:auto;overflow-y:auto;max-height:420px"><table class="heatmap-table" style="font-size:'+fontSize+'px"><thead><tr><th class="row-header" style="font-size:'+fontSize+'px">↓ replies to →</th>';
+  shortSenders.forEach(n => { table += '<th>' + n + '</th>'; });
+  table += '</tr></thead><tbody>';
+  senders.forEach((from, ri) => {
+    table += '<tr><th class="row-header">' + shortSenders[ri] + '</th>';
+    senders.forEach((to, ci) => {
+      const isSelf = from === to;
+      const val = matrix[from][to];
+      const bg = heatColor(val, isSelf);
+      const tc = textColor(val, isSelf);
+      table += '<td class="'+(isSelf?'self':'')+'" style="background:'+bg+';color:'+tc+'">'+(isSelf?'·':val)+'</td>';
+    });
+    table += '</tr>';
+  });
+  table += '</tbody></table>';
+  table += '</table></div>';
+  document.getElementById('chemHeatmap').innerHTML = table;
+}
+
+// ─── SHARE CARD GENERATION ───────────────────────────────────────────────────
+let shareCanvas = null;
+let currentStats = null;
+let currentTotal = 0;
+
+// Store stats globally so share can access them
+const _origRender = renderResults;
+
+function generateShareCard() {
+  if (!currentStats) return;
+  const modal = document.getElementById('shareModal');
+  modal.classList.add('open');
+  const wrap = document.getElementById('shareCardWrap');
+  wrap.innerHTML = '<div style="text-align:center;padding:32px;color:#6b9a7a;font-size:13px">Generating card...</div>';
+
+  setTimeout(() => {
+    shareCanvas = buildShareCanvas(currentStats, currentTotal);
+    wrap.innerHTML = '';
+    shareCanvas.style.width = '100%';
+    shareCanvas.style.height = 'auto';
+    shareCanvas.style.borderRadius = '12px';
+    wrap.appendChild(shareCanvas);
+  }, 50);
+}
+
+function closeModal() {
+  document.getElementById('shareModal').classList.remove('open');
+}
+
+function downloadCard() {
+  if (!shareCanvas) return;
+  const link = document.createElement('a');
+  link.download = 'chatscope-recap.png';
+  link.href = shareCanvas.toDataURL('image/png');
+  link.click();
+}
+
+function buildShareCanvas(stats, total) {
+  const people = Object.entries(stats).sort((a,b) => b[1].messages - a[1].messages);
+  const W = 600;
+  const ROW_H = 72;
+  const HEADER_H = 140;
+  const FOOTER_H = 52;
+  const H = HEADER_H + people.length * ROW_H + FOOTER_H + 24;
+
+  const canvas = document.createElement('canvas');
+  const DPR = 2;
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(DPR, DPR);
+
+  // ── Background
+  ctx.fillStyle = '#0d1a10';
+  ctx.fillRect(0, 0, W, H);
+
+  // subtle grid dots
+  ctx.fillStyle = 'rgba(37,211,102,0.06)';
+  for (let x = 20; x < W; x += 28) {
+    for (let y = 20; y < H; y += 28) {
+      ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  // green glow top-left
+  const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, 280);
+  grd.addColorStop(0, 'rgba(37,211,102,0.12)');
+  grd.addColorStop(1, 'rgba(37,211,102,0)');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Header area
+  // Logo circle
+  const lcx = 36, lcy = 44, lr = 18;
+  ctx.fillStyle = '#25D366';
+  ctx.beginPath(); ctx.arc(lcx, lcy, lr, 0, Math.PI*2); ctx.fill();
+  // WA icon (simple speech bubble)
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 18px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('💬', lcx, lcy + 6);
+
+  // Title
+  ctx.fillStyle = '#e8f5ee';
+  ctx.font = 'bold 22px "Syne", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Chat', 64, 36);
+  ctx.fillStyle = '#25D366';
+  ctx.fillText('Scope', 64 + ctx.measureText('Chat').width + 2, 36);
+
+  ctx.fillStyle = '#6b9a7a';
+  ctx.font = '13px "DM Sans", sans-serif';
+  ctx.fillText('Group Recap', 64, 56);
+
+  // Summary pills
+  const summaryItems = [
+    { label: 'msgs', val: total },
+    { label: 'people', val: people.length },
+    { label: 'emojis', val: people.reduce((a,p)=>a+p[1].emojis,0) },
+    { label: 'foul 🤬', val: people.reduce((a,p)=>a+p[1].foul,0) },
+  ];
+  let px = 28;
+  const py = 90;
+  summaryItems.forEach(item => {
+    const valStr = String(item.val);
+    const labStr = ' ' + item.label;
+    const vw = ctx.measureText(valStr).width;
+    // measure with val font
+    ctx.font = 'bold 13px "Syne", sans-serif';
+    const vw2 = ctx.measureText(valStr).width;
+    ctx.font = '12px "DM Sans", sans-serif';
+    const lw = ctx.measureText(labStr).width;
+    const pillW = vw2 + lw + 20;
+    const pillH = 28;
+
+    roundRect(ctx, px, py, pillW, pillH, 14);
+    ctx.fillStyle = 'rgba(37,211,102,0.1)';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(37,211,102,0.25)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    ctx.fillStyle = '#25D366';
+    ctx.font = 'bold 13px "Syne", sans-serif';
+    ctx.fillText(valStr, px + 10, py + 18);
+    ctx.fillStyle = '#6b9a7a';
+    ctx.font = '12px "DM Sans", sans-serif';
+    ctx.fillText(labStr, px + 10 + vw2, py + 18);
+
+    px += pillW + 8;
+  });
+
+  // divider
+  ctx.strokeStyle = 'rgba(37,211,102,0.1)';
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, HEADER_H - 1); ctx.lineTo(W, HEADER_H - 1); ctx.stroke();
+
+  // ── Person rows
+  const CARD_COLORS = ['#25D366','#4a9eff','#f0a500','#ff5a5a','#b57bee','#1abc9c','#ff8c42','#5dade2'];
+  const maxMsgs = Math.max(...people.map(p => p[1].messages));
+  const crownMsg = people[0][0];
+  const crownEmoji = [...people].sort((a,b)=>b[1].emojis-a[1].emojis)[0][0];
+  const crownFoul = [...people].sort((a,b)=>b[1].foul-a[1].foul)[0][0];
+
+  people.forEach(([name, s], i) => {
+    const ry = HEADER_H + i * ROW_H;
+    const color = CARD_COLORS[i % CARD_COLORS.length];
+
+    // row bg (alternating subtle)
+    if (i % 2 === 0) {
+      ctx.fillStyle = 'rgba(255,255,255,0.015)';
+      ctx.fillRect(0, ry, W, ROW_H);
+    }
+
+    // Avatar circle
+    const ax = 36, ay = ry + ROW_H/2;
+    ctx.fillStyle = color + '30';
+    ctx.beginPath(); ctx.arc(ax, ay, 20, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = color;
+    ctx.font = 'bold 13px "Syne", sans-serif';
+    ctx.textAlign = 'center';
+    const initials = name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    ctx.fillText(initials, ax, ay + 5);
+
+    // Name
+    ctx.fillStyle = '#e8f5ee';
+    ctx.font = 'bold 14px "Syne", sans-serif';
+    ctx.textAlign = 'left';
+    const displayName = name.replace(/ IITB$/i,'').replace(/ IIT$/i,'');
+    ctx.fillText(displayName.length > 16 ? displayName.slice(0,15)+'…' : displayName, 66, ry + 24);
+
+    // Crowns inline
+    let crownX = 66;
+    const crownY = ry + 38;
+    ctx.font = '10px "DM Sans", sans-serif';
+    const badges = [];
+    if (name === crownMsg) badges.push({ text: '🏆 Most Active', bg: 'rgba(37,211,102,0.15)', col: '#25D366' });
+    if (name === crownEmoji && s.emojis > 0) badges.push({ text: '👑 Emoji King', bg: 'rgba(240,165,0,0.15)', col: '#f0a500' });
+    if (name === crownFoul && s.foul > 0) badges.push({ text: '🤬 Sailor', bg: 'rgba(255,90,90,0.15)', col: '#ff5a5a' });
+    badges.slice(0,2).forEach(b => {
+      ctx.font = '9px "DM Sans", sans-serif';
+      const bw = ctx.measureText(b.text).width + 12;
+      roundRect(ctx, crownX, crownY - 9, bw, 14, 7);
+      ctx.fillStyle = b.bg; ctx.fill();
+      ctx.fillStyle = b.col;
+      ctx.fillText(b.text, crownX + 6, crownY + 1);
+      crownX += bw + 5;
+    });
+
+    // Progress bar
+    const barX = 66, barY = ry + ROW_H - 14, barW = 180, barH = 3;
+    ctx.fillStyle = 'rgba(37,211,102,0.1)';
+    roundRect(ctx, barX, barY, barW, barH, 2); ctx.fill();
+    const fillW = Math.max(4, (s.messages / maxMsgs) * barW);
+    ctx.fillStyle = color;
+    roundRect(ctx, barX, barY, fillW, barH, 2); ctx.fill();
+
+    // Stats on the right side
+    const statsRight = [
+      { icon: '💬', val: s.messages },
+      { icon: '😄', val: s.emojis },
+      { icon: '🤬', val: s.foul },
+      { icon: '📸', val: s.media },
+    ];
+    let sx = W - 28;
+    statsRight.reverse().forEach(st => {
+      ctx.font = 'bold 13px "Syne", sans-serif';
+      const vw = ctx.measureText(String(st.val)).width;
+      ctx.fillStyle = '#e8f5ee';
+      ctx.textAlign = 'right';
+      ctx.fillText(st.val, sx, ry + ROW_H/2 + 5);
+      ctx.font = '13px sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(st.icon, sx - vw - 2, ry + ROW_H/2 + 5);
+      sx -= vw + 28;
+    });
+
+    // row divider
+    ctx.strokeStyle = 'rgba(37,211,102,0.06)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(16, ry + ROW_H); ctx.lineTo(W - 16, ry + ROW_H);
+    ctx.stroke();
+  });
+
+  // ── Footer
+  const fy = HEADER_H + people.length * ROW_H + 12;
+  ctx.fillStyle = 'rgba(37,211,102,0.06)';
+  ctx.fillRect(0, fy - 12, W, FOOTER_H + 12);
+
+  ctx.fillStyle = '#25D366';
+  ctx.font = 'bold 13px "Syne", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('ChatScope', W/2, fy + 20);
+  ctx.fillStyle = '#6b9a7a';
+  ctx.font = '11px "DM Sans", sans-serif';
+  ctx.fillText('chatscope · whatsapp chat analyser', W/2, fy + 36);
+
+  return canvas;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+
+// ─── PDF REPORT GENERATION ───────────────────────────────────────────────────
+async function generatePDF() {
+  if (!currentStats || !currentMsgs) return;
+  const btn = document.getElementById('pdfBtn');
+  const origHTML = btn.innerHTML;
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const PW = 210, PH = 297, M = 14, CW = 210 - 28;
+    let y = M;
+
+    // ── Colour helpers
+    const C = {
+      bg:     [10, 18, 12],
+      card:   [20, 32, 22],
+      band:   [14, 28, 16],
+      green:  [37, 211, 102],
+      muted:  [100, 148, 115],
+      text:   [225, 242, 230],
+      danger: [240, 80, 80],
+      amber:  [230, 160, 0],
+      blue:   [70, 150, 245],
+      colors: [[37,211,102],[70,150,245],[230,160,0],[240,80,80],[175,115,235],[26,185,155],[245,130,60],[85,165,220]],
+    };
+    const sf = rgb => doc.setFillColor(rgb[0],rgb[1],rgb[2]);
+    const st = rgb => doc.setTextColor(rgb[0],rgb[1],rgb[2]);
+    const sd = rgb => doc.setDrawColor(rgb[0],rgb[1],rgb[2]);
+    const sn = n => n.replace(/ IITB$/i,'').replace(/ IIT$/i,'').split(' ')[0];
+
+    // ── Page helpers
+    function newPage() {
+      doc.addPage();
+      sf(C.bg); doc.rect(0,0,PW,PH,'F');
+      sf(C.band); doc.rect(0,0,PW,8,'F');
+      sf(C.green); doc.rect(0,0,PW,0.8,'F');
+      st(C.muted); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
+      doc.text('ChatScope — WhatsApp Chat Analysis', M, 5.5);
+      y = 16;
+    }
+    function checkY(need) { if (y + need > PH - 12) newPage(); }
+
+    function sectionHead(title) {
+      checkY(12);
+      y += 5;
+      sf(C.band); doc.rect(M, y, CW, 7, 'F');
+      sf(C.green); doc.rect(M, y, 2, 7, 'F');
+      st(C.green); doc.setFont('helvetica','bold'); doc.setFontSize(7.5);
+      doc.text(title, M+5, y+4.8);
+      y += 12;
+    }
+
+    // ═══════════════════════════════════════════
+    // PAGE 1 — HEADER
+    // ═══════════════════════════════════════════
+    sf(C.bg); doc.rect(0,0,PW,PH,'F');
+    sf(C.band); doc.rect(0,0,PW,46,'F');
+    sf(C.green); doc.rect(0,0,PW,1.5,'F');
+
+    // Logo
+    sf(C.green); doc.circle(M+9, 23, 9, 'F');
+    st([10,18,12]); doc.setFont('helvetica','bold'); doc.setFontSize(9);
+    doc.text('CS', M+9, 26.5, {align:'center'});
+
+    // Title
+    st(C.text); doc.setFont('helvetica','bold'); doc.setFontSize(22);
+    doc.text('ChatScope', M+24, 20);
+    st(C.green); doc.setFontSize(9);
+    doc.text('WhatsApp Chat Analysis Report', M+24, 28);
+    st(C.muted); doc.setFontSize(8);
+    doc.text('Generated ' + new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'}), M+24, 35);
+
+    // Privacy pill
+    sf(C.card); doc.roundedRect(PW-M-36, 16, 36, 9, 2, 2, 'F');
+    st(C.green); doc.setFontSize(7);
+    doc.text('100% Private', PW-M-18, 21.8, {align:'center'});
+
+    y = 54;
+
+    // ═══════════════════════════════════════════
+    // SECTION 1 — OVERVIEW
+    // ═══════════════════════════════════════════
+    sectionHead('Overview');
+    const people = Object.entries(currentStats).sort((a,b)=>b[1].messages-a[1].messages);
+    const tot = currentTotal;
+    const totEmoji = people.reduce((s,p)=>s+p[1].emojis,0);
+    const totFoul  = people.reduce((s,p)=>s+p[1].foul,0);
+    const totMedia = people.reduce((s,p)=>s+p[1].media,0);
+
+    const ov = [{l:'Total Messages',v:tot,c:C.green},{l:'Participants',v:people.length,c:C.blue},
+                {l:'Total Emojis',v:totEmoji,c:C.amber},{l:'Foul Words',v:totFoul,c:C.danger}];
+    const ocw = (CW-9)/4;
+    ov.forEach((o,i)=>{
+      const ox = M + i*(ocw+3);
+      sf(C.card); doc.roundedRect(ox,y,ocw,22,2,2,'F');
+      sf(o.c); doc.rect(ox,y,ocw,1.5,'F');
+      st(o.c); doc.setFont('helvetica','bold'); doc.setFontSize(17);
+      doc.text(String(o.v), ox+ocw/2, y+13, {align:'center'});
+      st(C.muted); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
+      doc.text(o.l, ox+ocw/2, y+19, {align:'center'});
+    });
+    y += 28;
+
+    // ═══════════════════════════════════════════
+    // SECTION 2 — PER-PERSON TABLE
+    // ═══════════════════════════════════════════
+    sectionHead('Per-person breakdown');
+
+    // Col definitions
+    const tcols = [
+      {k:'name',  label:'Name',    w:46},
+      {k:'msgs',  label:'Msgs',    w:18},
+      {k:'pct',   label:'Share',   w:14},
+      {k:'emoji', label:'Emojis',  w:16},
+      {k:'foul',  label:'Foul',    w:14},
+      {k:'media', label:'Media',   w:14},
+      {k:'fill',  label:'Fillers', w:16},
+      {k:'avg',   label:'Avg len', w:20},
+    ];
+    // Compute x positions
+    let tx = M;
+    tcols.forEach(c=>{ c.x=tx; tx+=c.w; });
+
+    checkY(8);
+    sf(C.band); doc.rect(M,y,CW,7,'F');
+    st(C.muted); doc.setFont('helvetica','bold'); doc.setFontSize(6.5);
+    tcols.forEach(c=>doc.text(c.label, c.x+1, y+4.8));
+    y += 7;
+
+    const maxM = Math.max(...people.map(p=>p[1].messages));
+    people.forEach(([name,s],i)=>{
+      checkY(10);
+      sf(i%2===0?C.card:[16,25,18]); doc.rect(M,y,CW,9,'F');
+      // dot
+      const rgb=C.colors[i%C.colors.length];
+      sf(rgb); doc.circle(M+3, y+4.5, 2, 'F');
+      // name
+      st(C.text); doc.setFont('helvetica','bold'); doc.setFontSize(7);
+      const dn=sn(name); doc.text(dn.length>13?dn.slice(0,12)+'…':dn, tcols[0].x+6, y+5.5);
+      // stats
+      doc.setFont('helvetica','normal'); doc.setFontSize(7);
+      st(C.text);  doc.text(String(s.messages),                tcols[1].x+1, y+5.5);
+      st(C.muted); doc.text(Math.round(s.messages/tot*100)+'%',tcols[2].x+1, y+5.5);
+      st(C.amber); doc.text(String(s.emojis),                  tcols[3].x+1, y+5.5);
+      st(s.foul>0?C.danger:C.muted); doc.text(String(s.foul),  tcols[4].x+1, y+5.5);
+      st(C.blue);  doc.text(String(s.media),                   tcols[5].x+1, y+5.5);
+      st(C.muted); doc.text(String(s.filler),                  tcols[6].x+1, y+5.5);
+      st(C.text);  doc.text((s.chars/Math.max(s.messages,1)).toFixed(0)+'c', tcols[7].x+1, y+5.5);
+      // mini bar
+      sf([25,45,28]); doc.rect(tcols[0].x+6, y+7.2, 36, 1.2, 'F');
+      sf(rgb);        doc.rect(tcols[0].x+6, y+7.2, 36*(s.messages/maxM), 1.2, 'F');
+      y += 9;
+    });
+    y += 5;
+
+    // ═══════════════════════════════════════════
+    // SECTION 3 — CHEMISTRY
+    // ═══════════════════════════════════════════
+    sectionHead('Chemistry — pair dynamics');
+    const chemPairs = computeChemistry(currentMsgs);
+    if (chemPairs.length === 0) {
+      st(C.muted); doc.setFontSize(8);
+      doc.text('Not enough data.', M, y); y+=10;
+    } else {
+      const maxScore = chemPairs[0].score;
+      const topP = chemPairs.slice(0, Math.min(6, chemPairs.length));
+      const pcw = (CW - 4) / 2;
+
+      for (let i = 0; i < topP.length; i += 2) {
+        checkY(28);
+        [topP[i], topP[i+1]].forEach((p,side)=>{
+          if (!p) return;
+          const px = M + side*(pcw+4);
+          sf(C.card); doc.roundedRect(px,y,pcw,26,2,2,'F');
+          if (i+side===0) { sd(C.amber); doc.setLineWidth(0.4); doc.roundedRect(px,y,pcw,26,2,2,'S'); }
+          // rank
+          const rank = i+side;
+          st(rank===0?C.amber:rank===1?[175,175,175]:rank===2?[195,135,55]:C.muted);
+          doc.setFont('helvetica','bold'); doc.setFontSize(8);
+          doc.text(rank===0?'#1 Best Pair':rank===1?'#2':rank===2?'#3':'#'+(rank+1), px+3,y+7);
+          // names
+          st(C.text); doc.setFontSize(9);
+          doc.text(sn(p.a)+' & '+sn(p.b), px+3, y+14);
+          // score bar
+          sf([25,45,28]); doc.rect(px+3,y+16,pcw-6,2,'F');
+          sf(rank===0?C.amber:C.green);
+          doc.rect(px+3,y+16,(pcw-6)*(p.score/maxScore),2,'F');
+          // stats
+          st(rank===0?C.amber:C.green); doc.setFontSize(7.5); doc.setFont('helvetica','bold');
+          doc.text('Score: '+p.score, px+3, y+21);
+          st(C.muted); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
+          const gs = p.avgGapMin<1?'<1m avg reply':Math.round(p.avgGapMin)+'m avg reply';
+          doc.text(p.replies+' exchanges · '+gs, px+3, y+25);
+        });
+        y += 30;
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    // SECTION 4 — REPLY MATRIX
+    // ═══════════════════════════════════════════
+    sectionHead('Reply affinity matrix');
+    const sndrs = [...new Set(currentMsgs.map(m=>m.sender))];
+    const mat = {};
+    sndrs.forEach(a=>{ mat[a]={}; sndrs.forEach(b=>mat[a][b]=0); });
+    for(let i=1;i<currentMsgs.length;i++){
+      const c=currentMsgs[i], p=currentMsgs[i-1];
+      if(c.sender!==p.sender) mat[c.sender][p.sender]++;
+    }
+    const mvals=[]; sndrs.forEach(a=>sndrs.forEach(b=>{if(a!==b)mvals.push(mat[a][b]);}));
+    const mmax=Math.max(...mvals,1);
+    const lw=32, cw2=Math.min(20,(CW-lw)/sndrs.length), ch=6.5;
+
+    checkY(ch*(sndrs.length+2));
+    // header
+    sf(C.band); doc.rect(M,y,CW,ch,'F');
+    st(C.muted); doc.setFont('helvetica','bold'); doc.setFontSize(5.5);
+    doc.text('replies to \u2192', M+2, y+4.2);
+    sndrs.forEach((s,ci)=>{
+      doc.text(sn(s).slice(0,5), M+lw+ci*cw2+cw2/2, y+4.2, {align:'center'});
+    });
+    y+=ch;
+
+    sndrs.forEach((from,ri)=>{
+      checkY(ch+1);
+      sf(ri%2===0?C.card:[16,25,18]); doc.rect(M,y,CW,ch,'F');
+      st(C.muted); doc.setFont('helvetica','bold'); doc.setFontSize(5.5);
+      doc.text(sn(from).slice(0,8), M+2, y+4.2);
+      sndrs.forEach((to,ci)=>{
+        const self=from===to, val=mat[from][to], t=self?0:val/mmax;
+        const cx=M+lw+ci*cw2;
+        if(!self&&val>0){
+          // blend green by intensity — bake opacity into the colour since jsPDF 2.x has no GState
+          const r=Math.round(C.bg[0]*(1-t)+10*t+t*27);
+          const g=Math.round(C.bg[1]*(1-t)+80*t+t*131);
+          const b=Math.round(C.bg[2]*(1-t)+20*t+t*30);
+          doc.setFillColor(r,g,b);
+          doc.rect(cx,y,cw2,ch,'F');
+        }
+        st(self?C.muted:(t>0.4?C.text:C.muted));
+        doc.setFont('helvetica',t>0.5?'bold':'normal');
+        doc.setFontSize(5.5);
+        doc.text(self?'\u00b7':String(val), cx+cw2/2, y+4.2, {align:'center'});
+      });
+      y+=ch;
+    });
+    y+=6;
+
+    // ═══════════════════════════════════════════
+    // SECTION 5 — TOP WORDS
+    // ═══════════════════════════════════════════
+    sectionHead('Most used words');
+    if (currentWordData) {
+      // Global top 20 as a wrapped tag list
+      st(C.muted); doc.setFont('helvetica','bold'); doc.setFontSize(6.5);
+      doc.text('Global top words:', M, y); y+=5;
+
+      const gwords = currentWordData.global.slice(0,20);
+      const maxWC = gwords[0]?.count||1;
+      let wx=M; const lineH=7;
+      checkY(lineH*3);
+      gwords.forEach(({word,count})=>{
+        const t=count/maxWC;
+        const fs=Math.round(6+t*5);
+        doc.setFontSize(fs);
+        const ww=doc.getTextWidth(word+' '+count)+6;
+        if(wx+ww>M+CW){ wx=M; y+=lineH; checkY(lineH); }
+        // pill bg
+        sf(C.card); doc.roundedRect(wx,y-4,ww,5.5,1.5,1.5,'F');
+        st(C.green); doc.setFont('helvetica','bold'); doc.setFontSize(fs);
+        doc.text(word, wx+2, y);
+        st(C.muted); doc.setFont('helvetica','normal'); doc.setFontSize(fs-1);
+        doc.text(String(count), wx+2+doc.getTextWidth(word)+1, y);
+        wx+=ww+3;
+      });
+      y+=lineH+4;
+
+      // Per person — 2 columns
+      const ppw=(CW-4)/2;
+      const pnames=Object.keys(currentWordData.perPerson);
+      for(let pi=0;pi<pnames.length;pi+=2){
+        checkY(30);
+        [pnames[pi],pnames[pi+1]].forEach((name,side)=>{
+          if(!name)return;
+          const px2=M+side*(ppw+4);
+          const words=currentWordData.perPerson[name]||[];
+          const rgb2=C.colors[pnames.indexOf(name)%C.colors.length];
+          sf(C.card); doc.roundedRect(px2,y,ppw,28,2,2,'F');
+          sf(rgb2); doc.rect(px2,y,ppw,1,'F');
+          st(rgb2); doc.setFont('helvetica','bold'); doc.setFontSize(7);
+          doc.text(sn(name), px2+3, y+6);
+          st(C.text); doc.setFont('helvetica','normal'); doc.setFontSize(6);
+          const top8=words.slice(0,8);
+          const maxwc2=top8[0]?.count||1;
+          let wy=y+12, wx2=px2+3;
+          top8.forEach(({word,count})=>{
+            const t2=count/maxwc2;
+            const ww2=doc.getTextWidth(word)+doc.getTextWidth(' '+count)+5;
+            if(wx2+ww2>px2+ppw-2){ wx2=px2+3; wy+=5; if(wy>y+27)return; }
+            st([Math.round(rgb2[0]*0.6+37*0.4),Math.round(rgb2[1]*0.6+180*0.4),Math.round(rgb2[2]*0.6+80*0.4)]);
+            doc.setFont('helvetica','bold'); doc.setFontSize(5.5+t2*2);
+            doc.text(word, wx2, wy);
+            st(C.muted); doc.setFont('helvetica','normal'); doc.setFontSize(5);
+            doc.text(' '+count, wx2+doc.getTextWidth(word), wy);
+            wx2+=ww2+2;
+          });
+        });
+        y+=32;
+      }
+    }
+
+    // ═══════════════════════════════════════════
+    // FOOTER ON ALL PAGES
+    // ═══════════════════════════════════════════
+    const np = doc.getNumberOfPages();
+    for(let pg=1;pg<=np;pg++){
+      doc.setPage(pg);
+      sf(C.band); doc.rect(0,PH-9,PW,9,'F');
+      st(C.muted); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
+      doc.text('ChatScope \u00b7 Data never leaves your device', PW/2, PH-3.5, {align:'center'});
+      st(C.green); doc.text('Page '+pg+' of '+np, PW-M, PH-3.5, {align:'right'});
+    }
+
+    // Use arraybuffer + manual blob to avoid CSP blocking doc.save()'s internal blob URL
+    const pdfBytes = doc.output('arraybuffer');
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'chatscope-report.pdf';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(url); document.body.removeChild(a); }, 2000);
+
+  } catch(e) {
+    console.error('PDF error:', e);
+    alert('PDF export failed: '+e.message+'\n\nCheck the browser console for details.');
+  } finally {
+    btn.innerHTML = origHTML;
+    btn.disabled = false;
+  }
+}
+
+</script>
+</body>
+</html>
