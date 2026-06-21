@@ -2,1012 +2,370 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Truth or Lie? 🤔</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     --bg: #0d0d1a;
-    --bg2: #13132b;
     --card: #1c1c38;
-    --border: rgba(124,58,237,0.25);
+    --border: rgba(124,58,237,0.2);
     --purple: #7c3aed;
     --purple-light: #a855f7;
     --amber: #f59e0b;
     --green: #10b981;
     --red: #ef4444;
-    --blue: #3b82f6;
     --text: #f1f5f9;
     --muted: #94a3b8;
-    --truth: #10b981;
-    --lie: #ef4444;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { height: 100%; overflow-x: hidden; }
   body {
     font-family: 'DM Sans', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px 48px;
   }
   body::before {
     content: '';
     position: fixed; inset: 0;
-    background:
-      radial-gradient(ellipse at 20% 0%, rgba(124,58,237,0.12) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 100%, rgba(245,158,11,0.08) 0%, transparent 60%);
-    pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at 30% 0%, rgba(124,58,237,0.1) 0%, transparent 60%);
+    pointer-events: none;
   }
 
-  /* ── SCREENS ── */
-  .screen {
-    display: none;
-    position: relative; z-index: 1;
-    min-height: 100vh;
-    padding: 24px 20px 40px;
-    animation: fadeIn 0.35s ease;
-  }
-  .screen.active { display: flex; flex-direction: column; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .wrap { width: 100%; max-width: 540px; position: relative; z-index: 1; }
 
-  .center { align-items: center; justify-content: center; text-align: center; }
-
-  /* ── TYPOGRAPHY ── */
-  h1 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(40px, 10vw, 72px);
-    font-weight: 800;
-    line-height: 1;
-    color: var(--text);
+  /* HEADER */
+  .header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
   }
-  h1 em { font-style: normal; color: var(--purple-light); }
-  h2 {
-    font-family: 'Syne', sans-serif;
-    font-size: clamp(22px, 5vw, 36px);
-    font-weight: 800;
+  .logo {
+    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
   }
-  .tagline {
-    font-size: 16px; color: var(--muted); margin-top: 12px; line-height: 1.6;
+  .logo em { font-style: normal; color: var(--purple-light); }
+  .score-chip {
+    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+    background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.25);
+    color: var(--purple-light); padding: 6px 14px; border-radius: 20px;
   }
 
-  /* ── BUTTONS ── */
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 14px 28px; border-radius: 14px; border: none; cursor: pointer;
-    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px;
-    transition: transform 0.12s, opacity 0.15s, box-shadow 0.2s;
-    text-decoration: none;
+  /* CATEGORY PILLS */
+  .cat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
+  .cats {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;
   }
-  .btn:active { transform: scale(0.95); }
-  .btn-primary {
-    background: var(--purple);
-    color: #fff;
-    box-shadow: 0 0 32px rgba(124,58,237,0.35);
-  }
-  .btn-primary:hover { box-shadow: 0 0 48px rgba(124,58,237,0.55); }
-  .btn-truth {
-    background: var(--truth);
-    color: #fff;
-    font-size: 20px; padding: 20px 0; flex: 1;
-    box-shadow: 0 0 28px rgba(16,185,129,0.3);
-  }
-  .btn-truth:hover { box-shadow: 0 0 44px rgba(16,185,129,0.5); }
-  .btn-lie {
-    background: var(--lie);
-    color: #fff;
-    font-size: 20px; padding: 20px 0; flex: 1;
-    box-shadow: 0 0 28px rgba(239,68,68,0.3);
-  }
-  .btn-lie:hover { box-shadow: 0 0 44px rgba(239,68,68,0.5); }
-  .btn-ghost {
-    background: transparent; color: var(--muted);
-    border: 1.5px solid rgba(148,163,184,0.2); font-size: 14px; padding: 10px 20px;
-    border-radius: 10px;
-  }
-  .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
-  .btn-full { width: 100%; }
-  .btn-lg { padding: 18px 36px; font-size: 18px; }
-  .btn-sm { padding: 10px 18px; font-size: 13px; font-family: 'DM Sans', sans-serif; font-weight: 600; }
-
-  /* ── INPUT ── */
-  input[type="text"] {
-    width: 100%; padding: 14px 16px;
-    background: var(--card); border: 1.5px solid var(--border);
-    border-radius: 12px; color: var(--text); font-size: 15px;
-    font-family: 'DM Sans', sans-serif; outline: none;
-    transition: border-color 0.15s;
-  }
-  input[type="text"]:focus { border-color: var(--purple-light); }
-  input[type="text"]::placeholder { color: var(--muted); }
-
-  /* ── CARD ── */
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 24px;
-  }
-
-  /* ── LANDING SCREEN ── */
-  #screen-landing { padding-top: 60px; }
-  .landing-emoji { font-size: 72px; margin-bottom: 16px; animation: bounce 2s infinite; }
-  @keyframes bounce {
-    0%,100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
-  }
-  .rules-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-    margin: 28px 0;
-    max-width: 480px; width: 100%;
-  }
-  .rule-card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px; text-align: left;
-  }
-  .rule-icon { font-size: 24px; margin-bottom: 8px; }
-  .rule-title { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-  .rule-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
-
-  /* ── SETUP SCREEN ── */
-  #screen-setup { max-width: 480px; margin: 0 auto; padding-top: 48px; gap: 0; }
-  .setup-header { text-align: center; margin-bottom: 28px; }
-  .player-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-  .player-input-row {
-    display: flex; gap: 8px; align-items: center;
-  }
-  .player-avatar-sm {
-    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: #fff;
-  }
-  .remove-btn {
-    width: 32px; height: 32px; border-radius: 8px; border: none;
-    background: rgba(239,68,68,0.12); color: var(--red); cursor: pointer;
-    font-size: 16px; flex-shrink: 0; transition: background 0.15s;
-  }
-  .remove-btn:hover { background: rgba(239,68,68,0.25); }
-  .add-player-btn {
-    display: flex; align-items: center; gap: 8px;
-    width: 100%; padding: 12px 16px;
-    background: rgba(124,58,237,0.08); border: 1.5px dashed rgba(124,58,237,0.3);
-    border-radius: 12px; color: var(--purple-light); cursor: pointer;
-    font-size: 14px; font-family: 'DM Sans', sans-serif; font-weight: 500;
+  .cat-btn {
+    padding: 8px 16px; border-radius: 20px; border: 1.5px solid rgba(255,255,255,0.1);
+    background: transparent; color: var(--muted); cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
     transition: all 0.15s;
   }
-  .add-player-btn:hover { background: rgba(124,58,237,0.15); }
-  .setup-footer { margin-top: 20px; display: flex; flex-direction: column; gap: 10px; }
-  .rounds-row {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    padding: 12px 16px;
+  .cat-btn:hover { border-color: var(--purple); color: var(--text); }
+  .cat-btn.active {
+    background: var(--purple); border-color: var(--purple);
+    color: #fff; font-weight: 600;
   }
-  .rounds-label { font-size: 14px; color: var(--muted); }
-  .rounds-control { display: flex; align-items: center; gap: 12px; }
-  .rounds-btn {
-    width: 30px; height: 30px; border-radius: 8px; border: none;
-    background: rgba(124,58,237,0.2); color: var(--purple-light); cursor: pointer;
-    font-size: 18px; font-weight: 700; transition: background 0.15s;
-  }
-  .rounds-btn:hover { background: rgba(124,58,237,0.35); }
-  .rounds-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; min-width: 24px; text-align: center; }
 
-  /* ── GAME SCREEN ── */
-  #screen-game { max-width: 520px; margin: 0 auto; gap: 0; }
-  .game-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .round-badge {
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-    background: rgba(124,58,237,0.15); color: var(--purple-light);
-    padding: 6px 14px; border-radius: 20px; border: 1px solid rgba(124,58,237,0.3);
-  }
-  .category-badge {
-    font-size: 12px; color: var(--muted);
-    padding: 6px 12px; border-radius: 20px;
-    border: 1px solid rgba(148,163,184,0.15);
-  }
+  /* FACT CARD */
   .fact-card {
     background: var(--card); border: 1.5px solid var(--border);
     border-radius: 24px; padding: 28px 24px; margin-bottom: 20px;
+    min-height: 180px; display: flex; flex-direction: column; justify-content: center;
+    transition: border-color 0.4s;
     position: relative; overflow: hidden;
-    min-height: 160px; display: flex; flex-direction: column; justify-content: center;
   }
+  .fact-card.correct { border-color: rgba(16,185,129,0.6); }
+  .fact-card.wrong   { border-color: rgba(239,68,68,0.6); }
   .fact-card::before {
     content: '';
     position: absolute; top: -40px; right: -40px;
-    width: 140px; height: 140px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+    width: 160px; height: 160px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%);
     pointer-events: none;
   }
-  .fact-emoji { font-size: 36px; margin-bottom: 14px; }
+  .fact-emoji { font-size: 40px; margin-bottom: 14px; }
   .fact-text {
-    font-family: 'Syne', sans-serif; font-size: clamp(16px, 4vw, 22px); font-weight: 700;
-    line-height: 1.4; color: var(--text);
+    font-family: 'Syne', sans-serif; font-size: clamp(17px, 4vw, 22px);
+    font-weight: 700; line-height: 1.45; color: var(--text);
   }
-  .fact-category-tag {
+  .fact-cat {
     display: inline-block; margin-top: 14px;
     font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
-    color: var(--purple-light); background: rgba(124,58,237,0.12);
+    color: var(--purple-light); background: rgba(124,58,237,0.1);
     padding: 4px 10px; border-radius: 20px;
   }
 
-  /* voting state */
-  .voter-info {
-    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
-    padding: 16px 20px; margin-bottom: 14px;
-    display: flex; align-items: center; gap: 12px;
+  /* VOTE BUTTONS */
+  .vote-row {
+    display: flex; gap: 12px; margin-bottom: 16px;
   }
-  .voter-avatar {
-    width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: #fff;
+  .btn-vote {
+    flex: 1; padding: 18px; border-radius: 16px; border: none; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+    transition: transform 0.12s, box-shadow 0.2s, opacity 0.2s;
   }
-  .voter-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px; }
-  .voter-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .vote-progress {
-    display: flex; gap: 6px; margin-bottom: 18px;
+  .btn-vote:active { transform: scale(0.95); }
+  .btn-truth {
+    background: var(--green); color: #fff;
+    box-shadow: 0 0 28px rgba(16,185,129,0.25);
   }
-  .vote-pip {
-    height: 4px; flex: 1; border-radius: 2px;
-    background: rgba(255,255,255,0.08); transition: background 0.3s;
+  .btn-truth:hover { box-shadow: 0 0 44px rgba(16,185,129,0.45); }
+  .btn-lie {
+    background: var(--red); color: #fff;
+    box-shadow: 0 0 28px rgba(239,68,68,0.25);
   }
-  .vote-pip.done { background: var(--purple); }
-  .vote-pip.active { background: var(--amber); animation: pulse-pip 1s infinite; }
-  @keyframes pulse-pip { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-  .vote-buttons { display: flex; gap: 12px; }
-  .voted-overlay {
-    position: absolute; inset: 0; background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    flex-direction: column; gap: 12px; border-radius: 24px;
-    z-index: 10; animation: fadeIn 0.2s ease;
-  }
-  .voted-text { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; color: var(--muted); }
+  .btn-lie:hover { box-shadow: 0 0 44px rgba(239,68,68,0.45); }
+  .btn-vote.dimmed { opacity: 0.35; transform: scale(0.97); cursor: default; }
+  .btn-vote.chosen { transform: scale(1.03); }
 
-  /* ── REVEAL SCREEN ── */
-  #screen-reveal { max-width: 520px; margin: 0 auto; gap: 0; }
-  .reveal-header { text-align: center; margin-bottom: 24px; }
-  .verdict-badge {
-    display: inline-flex; align-items: center; gap: 10px;
-    font-family: 'Syne', sans-serif; font-size: clamp(26px, 7vw, 42px); font-weight: 800;
-    padding: 12px 28px; border-radius: 20px; margin-bottom: 12px;
-    animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  /* REVEAL PANEL */
+  .reveal-panel {
+    display: none;
+    background: var(--card); border: 1.5px solid var(--border);
+    border-radius: 20px; padding: 20px 22px; margin-bottom: 16px;
+    animation: slideUp 0.35s cubic-bezier(0.34,1.4,0.64,1);
   }
-  @keyframes pop { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-  .verdict-truth { background: rgba(16,185,129,0.15); color: var(--truth); border: 2px solid rgba(16,185,129,0.4); }
-  .verdict-lie { background: rgba(239,68,68,0.15); color: var(--lie); border: 2px solid rgba(239,68,68,0.4); }
-  .reveal-fact-text {
-    font-size: 15px; color: var(--muted); line-height: 1.6; margin-bottom: 4px;
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
   }
-  .reveal-statement {
-    font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 700;
-    color: var(--text); margin-bottom: 8px; line-height: 1.4;
+  .reveal-panel.show { display: block; }
+  .verdict {
+    font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800;
+    margin-bottom: 10px;
   }
-  .reveal-explanation {
-    font-size: 13px; color: var(--muted); line-height: 1.6;
-    padding: 12px 16px; background: rgba(255,255,255,0.04);
-    border-radius: 12px; border-left: 3px solid var(--purple);
-  }
-  .results-list { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
-  .result-row {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 14px; padding: 12px 16px;
-    animation: slideIn 0.3s ease both;
-  }
-  @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
-  .result-avatar {
-    width: 38px; height: 38px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: #fff;
-    flex-shrink: 0;
-  }
-  .result-name { flex: 1; font-weight: 600; font-size: 14px; }
-  .result-vote {
-    font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px;
-  }
-  .vote-truth-tag { background: rgba(16,185,129,0.15); color: var(--truth); }
-  .vote-lie-tag { background: rgba(239,68,68,0.15); color: var(--lie); }
-  .result-status { font-size: 20px; margin-left: 4px; }
-  .result-points {
-    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800;
-    color: var(--amber);
+  .verdict.v-correct { color: var(--green); }
+  .verdict.v-wrong   { color: var(--red); }
+  .verdict.v-neutral { color: var(--amber); }
+  .explanation {
+    font-size: 14px; color: var(--muted); line-height: 1.65;
+    border-left: 3px solid var(--purple); padding-left: 14px;
   }
 
-  /* ── SCORE SCREEN ── */
-  #screen-scores { max-width: 480px; margin: 0 auto; gap: 0; }
-  .scores-header { text-align: center; margin-bottom: 24px; }
-  .scores-list { display: flex; flex-direction: column; gap: 10px; }
-  .score-row {
-    display: flex; align-items: center; gap: 14px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px 20px;
-    transition: border-color 0.2s;
+  /* NEXT BUTTON */
+  .btn-next {
+    width: 100%; padding: 16px; border-radius: 16px; border: none; cursor: pointer;
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px;
+    background: var(--purple); color: #fff;
+    box-shadow: 0 0 28px rgba(124,58,237,0.3);
+    transition: box-shadow 0.2s, transform 0.12s;
+    display: none;
   }
-  .score-row.leader { border-color: rgba(245,158,11,0.5); background: rgba(245,158,11,0.06); }
-  .score-rank { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; width: 28px; }
-  .score-rank.gold { color: var(--amber); }
-  .score-rank.silver { color: #94a3b8; }
-  .score-rank.bronze { color: #cd7c3a; }
-  .score-avatar {
-    width: 44px; height: 44px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: #fff;
-    flex-shrink: 0;
-  }
-  .score-name { flex: 1; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; }
-  .score-pts { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--amber); }
-  .score-pts-label { font-size: 11px; color: var(--muted); }
-  .score-bar-wrap { flex: 1; }
-  .score-bar-bg { height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
-  .score-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--purple), var(--purple-light)); transition: width 0.6s ease; }
+  .btn-next:hover { box-shadow: 0 0 44px rgba(124,58,237,0.5); }
+  .btn-next:active { transform: scale(0.97); }
+  .btn-next.show { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-  /* ── WINNER SCREEN ── */
-  #screen-winner { text-align: center; gap: 0; }
-  .confetti-wrapper { font-size: 48px; animation: spin 1s ease 0.3s both; }
-  @keyframes spin { from { transform: rotate(-20deg) scale(0); } to { transform: rotate(0deg) scale(1); } }
-  .winner-crown { font-size: 80px; animation: float 3s ease-in-out infinite; }
-  @keyframes float { 0%,100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-15px) rotate(5deg); } }
-  .winner-name-display {
-    font-family: 'Syne', sans-serif; font-size: clamp(32px, 8vw, 56px); font-weight: 800;
-    background: linear-gradient(135deg, var(--amber), var(--purple-light));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    margin: 8px 0;
+  /* COUNTER */
+  .counter {
+    text-align: center; font-size: 13px; color: var(--muted); margin-top: 16px;
   }
-  .winner-score-display {
-    font-size: 18px; color: var(--muted); margin-bottom: 28px;
-  }
-  .winner-score-display strong { color: var(--amber); }
-  .confetti-rain {
-    position: fixed; inset: 0; pointer-events: none; z-index: 100; overflow: hidden;
-  }
-  .confetti-piece {
-    position: absolute; width: 10px; height: 10px;
-    animation: fall linear forwards;
-  }
-  @keyframes fall {
-    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-  }
-  .final-scores { width: 100%; max-width: 400px; margin: 0 auto 28px; display: flex; flex-direction: column; gap: 8px; }
-  .final-score-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px; border-radius: 12px;
-    background: var(--card); border: 1px solid var(--border);
-    font-size: 14px;
-  }
+  .counter strong { color: var(--text); }
 
-  /* ── MISC ── */
-  .spacer { flex: 1; }
-  .section-label {
-    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
-    color: var(--muted); margin-bottom: 10px;
-  }
-  .mt-auto { margin-top: auto; }
-  .gap-8 { gap: 8px; display: flex; flex-direction: column; }
-  .w-full { width: 100%; }
-  .text-center { text-align: center; }
-  .mb-4 { margin-bottom: 16px; }
-  .mb-6 { margin-bottom: 24px; }
-  .mt-4 { margin-top: 16px; }
-  .mt-6 { margin-top: 24px; }
-
-  /* Confetti colors */
-  .cc-1 { background: var(--purple); }
-  .cc-2 { background: var(--amber); }
-  .cc-3 { background: var(--truth); }
-  .cc-4 { background: var(--lie); }
-  .cc-5 { background: var(--blue); }
-  .cc-6 { background: #ec4899; }
-
-  /* Timer ring */
-  .timer-ring { position: relative; width: 52px; height: 52px; flex-shrink: 0; }
-  .timer-ring svg { transform: rotate(-90deg); }
-  .timer-ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 3; }
-  .timer-ring-fill { fill: none; stroke: var(--amber); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
-  .timer-num {
-    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; color: var(--amber);
-  }
-
-  /* Responsive */
-  @media (max-width: 420px) {
-    .rules-grid { grid-template-columns: 1fr; }
-    .vote-buttons { flex-direction: column; }
-    .btn-truth, .btn-lie { flex: none; width: 100%; }
-  }
-
-  /* Category colors */
-  .cat-animals { color: #10b981; background: rgba(16,185,129,0.1); }
-  .cat-science { color: #3b82f6; background: rgba(59,130,246,0.1); }
-  .cat-history { color: #f59e0b; background: rgba(245,158,11,0.1); }
-  .cat-food { color: #f97316; background: rgba(249,115,22,0.1); }
-  .cat-random { color: #a855f7; background: rgba(168,85,247,0.1); }
-
-  .disclaimer {
-    font-size: 11px; color: var(--muted); opacity: 0.6; margin-top: 8px;
-    line-height: 1.5;
+  @media (max-width: 400px) {
+    .btn-vote { font-size: 16px; padding: 16px 10px; }
   }
 </style>
 </head>
 <body>
+<div class="wrap">
 
-<!-- CONFETTI -->
-<div class="confetti-rain" id="confettiRain"></div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- SCREEN 1: LANDING -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="screen active center" id="screen-landing">
-  <div class="landing-emoji">🤔</div>
-  <h1>Truth or<br><em>Lie?</em></h1>
-  <p class="tagline">A hilarious party game with the world's most<br>surprising facts. Can you spot the lie?</p>
-
-  <div class="rules-grid">
-    <div class="rule-card">
-      <div class="rule-icon">📋</div>
-      <div class="rule-title">Read the Fact</div>
-      <div class="rule-desc">A wild statement appears. Discuss with your group!</div>
-    </div>
-    <div class="rule-card">
-      <div class="rule-icon">🗳️</div>
-      <div class="rule-title">Vote Secretly</div>
-      <div class="rule-desc">Each player picks Truth or Lie — no peeking!</div>
-    </div>
-    <div class="rule-card">
-      <div class="rule-icon">💥</div>
-      <div class="rule-title">Big Reveal</div>
-      <div class="rule-desc">The truth drops — feel the shock and shame!</div>
-    </div>
-    <div class="rule-card">
-      <div class="rule-icon">🏆</div>
-      <div class="rule-title">Win Points</div>
-      <div class="rule-desc">Correct guesses earn you 1 point per round.</div>
-    </div>
+  <div class="header">
+    <div class="logo">Truth or <em>Lie?</em> 🤔</div>
+    <div class="score-chip" id="scoreChip">0 / 0</div>
   </div>
 
-  <button class="btn btn-primary btn-lg" onclick="goToSetup()">Let's Play! 🎉</button>
-</div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- SCREEN 2: SETUP -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="screen" id="screen-setup">
-  <div class="setup-header">
-    <h2>Who's playing? 👥</h2>
-    <p class="tagline" style="margin-top:6px">Add 2 to 8 players to get started</p>
-  </div>
-
-  <p class="section-label">Players</p>
-  <div class="player-list" id="playerList"></div>
-
-  <button class="add-player-btn" id="addPlayerBtn" onclick="addPlayer()">
-    <span style="font-size:18px">＋</span> Add Player
-  </button>
-
-  <div class="setup-footer">
-    <div class="rounds-row">
-      <span class="rounds-label">Rounds per game</span>
-      <div class="rounds-control">
-        <button class="rounds-btn" onclick="changeRounds(-1)">−</button>
-        <span class="rounds-val" id="roundsVal">10</span>
-        <button class="rounds-btn" onclick="changeRounds(1)">＋</button>
-      </div>
-    </div>
-    <button class="btn btn-primary btn-full" onclick="startGame()">Start Game 🚀</button>
-    <button class="btn btn-ghost btn-full" onclick="showScreen('screen-landing')">← Back</button>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- SCREEN 3: GAME (Fact + Voting) -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="screen" id="screen-game">
-  <div class="game-header">
-    <span class="round-badge" id="roundBadge">Round 1 of 10</span>
-    <span class="category-badge" id="categoryBadge">Animals</span>
-  </div>
+  <div class="cat-label">Pick a category</div>
+  <div class="cats" id="cats"></div>
 
   <div class="fact-card" id="factCard">
-    <div class="fact-emoji" id="factEmoji">🐨</div>
-    <div class="fact-text" id="factText">Loading…</div>
-    <span class="fact-category-tag" id="factCatTag">Animals</span>
+    <div class="fact-emoji" id="factEmoji">🎲</div>
+    <div class="fact-text" id="factText">Tap a category above to start!</div>
+    <span class="fact-cat" id="factCat" style="display:none"></span>
   </div>
 
-  <!-- Voted overlay (shown while other players vote) -->
-  <div class="voted-overlay" id="votedOverlay" style="display:none; position:relative; min-height:200px; background:var(--bg2); border-radius:24px; margin-bottom:16px;">
-    <div style="font-size:48px">🙈</div>
-    <div class="voted-text">No peeking!<br>Passing to next player…</div>
+  <div class="vote-row" id="voteRow">
+    <button class="btn-vote btn-truth" id="btnTruth" onclick="vote(true)">✅ Truth</button>
+    <button class="btn-vote btn-lie"   id="btnLie"   onclick="vote(false)">❌ Lie</button>
   </div>
 
-  <div id="votingSection">
-    <div class="vote-progress" id="voteProgress"></div>
-    <div class="voter-info" id="voterInfo">
-      <div class="voter-avatar" id="voterAvatar">?</div>
-      <div>
-        <div class="voter-name" id="voterName">Player</div>
-        <div class="voter-sub">It's your turn to vote secretly</div>
-      </div>
-    </div>
-    <div class="vote-buttons">
-      <button class="btn btn-truth" onclick="castVote(true)">✅ Truth</button>
-      <button class="btn btn-lie" onclick="castVote(false)">❌ Lie</button>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- SCREEN 4: REVEAL -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="screen" id="screen-reveal">
-  <div class="reveal-header">
-    <div class="verdict-badge" id="verdictBadge">✅ TRUE!</div>
-    <div class="reveal-statement" id="revealStatement"></div>
-    <div class="reveal-explanation" id="revealExplanation"></div>
+  <div class="reveal-panel" id="revealPanel">
+    <div class="verdict" id="verdict"></div>
+    <div class="explanation" id="explanation"></div>
   </div>
 
-  <p class="section-label">How'd everyone do?</p>
-  <div class="results-list" id="resultsList"></div>
+  <button class="btn-next" id="btnNext" onclick="nextFact()">Next Fact →</button>
 
-  <div style="margin-top: auto; padding-top: 20px; display:flex; gap:10px;">
-    <button class="btn btn-primary btn-full" id="nextBtn" onclick="nextRound()">Next Round →</button>
-  </div>
-</div>
+  <div class="counter" id="counter"></div>
 
-<!-- ═══════════════════════════════════════════ -->
-<!-- SCREEN 5: SCORES (mid-game) -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="screen" id="screen-scores">
-  <div class="scores-header">
-    <div style="font-size:36px;margin-bottom:8px">📊</div>
-    <h2>Scoreboard</h2>
-    <p class="tagline" style="margin-top:6px" id="scoresSubtitle">After Round 3</p>
-  </div>
-  <div class="scores-list" id="scoresList"></div>
-  <div style="margin-top:auto; padding-top:24px; display:flex; gap:10px;">
-    <button class="btn btn-primary btn-full" id="continueBtn" onclick="continueGame()">Continue Playing →</button>
-  </div>
-</div>
-
-<!-- ═══════════════════════════════════════════ -->
-<!-- SCREEN 6: WINNER -->
-<!-- ═══════════════════════════════════════════ -->
-<div class="screen center" id="screen-winner">
-  <div class="winner-crown">👑</div>
-  <p style="font-size:14px;color:var(--muted);margin-top:8px">AND THE WINNER IS…</p>
-  <div class="winner-name-display" id="winnerName">Champion!</div>
-  <p class="winner-score-display">with <strong id="winnerScore">0</strong> correct answers</p>
-
-  <div class="final-scores" id="finalScoresList"></div>
-
-  <div style="display:flex;flex-direction:column;gap:10px;width:100%;max-width:360px;">
-    <button class="btn btn-primary btn-full btn-lg" onclick="playAgain()">Play Again 🎉</button>
-    <button class="btn btn-ghost btn-full" onclick="showScreen('screen-landing')">← Main Menu</button>
-  </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════
-// FACTS DATABASE
-// ══════════════════════════════════════════════════════════
 const FACTS = [
-  // ANIMALS - TRUE
-  { s: "Wombat poop is perfectly cube-shaped. It's the only animal in the world that produces cube-shaped droppings.", isTrue: true, emoji: "🐨", category: "Animals", exp: "Wombats produce about 80–100 cubes per night. Scientists discovered their elastic intestines create this unique shape to mark territory on rocks without rolling off." },
-  { s: "Otters hold hands while sleeping so they don't drift apart from each other.", isTrue: true, emoji: "🦦", category: "Animals", exp: "This behaviour is called 'rafting'. They also wrap themselves in kelp as an anchor. It's incredibly cute and completely real." },
-  { s: "Scotland's official national animal is a unicorn.", isTrue: true, emoji: "🦄", category: "Animals", exp: "Since the 12th century! The unicorn symbolised power and independence in Celtic mythology, and Scotland thought that was a whole vibe." },
-  { s: "A group of flamingos is officially called a 'flamboyance'.", isTrue: true, emoji: "🦩", category: "Animals", exp: "It's also called a stand or colony, but flamboyance is the most iconic. Fitting for such extra birds." },
-  { s: "Butterflies taste everything they land on — including your skin — with their feet.", isTrue: true, emoji: "🦋", category: "Animals", exp: "They have chemoreceptors on their feet, 200 times more sensitive than a human tongue. Hope you taste good." },
-  { s: "Sloths can hold their breath longer than dolphins — up to 40 minutes.", isTrue: true, emoji: "🦥", category: "Animals", exp: "By slowing their metabolism, sloths can hold their breath for up to 40 minutes while swimming. Dolphins max out around 10–15 minutes." },
-  { s: "Male seahorses are the ones who get pregnant and give birth.", isTrue: true, emoji: "🦀", category: "Animals", exp: "The female deposits eggs into a brood pouch on the male's belly. He carries them for 2–4 weeks and gives birth to hundreds of tiny seahorses." },
-  { s: "An octopus has three hearts and its blood is blue.", isTrue: true, emoji: "🐙", category: "Animals", exp: "Two hearts pump blood to the gills, one to the body. Octopus blood uses hemocyanin (copper-based) instead of hemoglobin, which makes it blue." },
-  { s: "Crows can recognise individual human faces and hold grudges against people who upset them.", isTrue: true, emoji: "🐦‍⬛", category: "Animals", exp: "Studies show crows not only recognise faces but teach other crows who to be wary of. If you've ever made a crow angry, it hasn't forgotten." },
-  { s: "A group of crows is officially called a 'murder'.", isTrue: true, emoji: "🐦", category: "Animals", exp: "The term dates back centuries and likely comes from folk tales about crows gathering when one of their own died, like a dark jury. Very gothic." },
-  { s: "Cows have best friends. They get anxious and stressed when separated from their bestie.", isTrue: true, emoji: "🐄", category: "Animals", exp: "Research from Northampton University found that cows have lower heart rates and less stress when paired with their preferred companion." },
-  { s: "Penguins propose to their mates by presenting them with a carefully chosen pebble.", isTrue: true, emoji: "🐧", category: "Animals", exp: "For Gentoo and Adélie penguins, pebbles are serious currency. The male searches for the perfect one and presents it. If she accepts, it goes into the nest." },
-  { s: "Turtles can breathe through their butts.", isTrue: true, emoji: "🐢", category: "Animals", exp: "It's called cloacal bursae breathing. In winter, freshwater turtles sit underwater and absorb oxygen directly through special tissue near their tail end. Nature is wild." },
-  { s: "Rats laugh when you tickle them, but at a frequency humans can't hear without special equipment.", isTrue: true, emoji: "🐀", category: "Animals", exp: "Neuroscientist Jaak Panksepp discovered this in 1999. Rats emit 50kHz chirps when tickled or playing — outside human hearing range. They also seek out tickling." },
-  { s: "Sharks are older than trees. They existed on Earth 50 million years before the first tree evolved.", isTrue: true, emoji: "🦈", category: "Animals", exp: "Sharks date back 450 million years. Trees only appeared about 360 million years ago. Sharks outlived the asteroid that killed the dinosaurs. True survivors." },
+  // ── ANIMALS ──
+  { s:"Wombat poop is perfectly cube-shaped. It's the only animal in the world that produces cube-shaped droppings.", isTrue:true,  emoji:"🐨", cat:"Animals", exp:"Wombats produce about 80–100 cubes per night. Scientists discovered their elastic intestines create this shape so droppings stack on rocks and don't roll away." },
+  { s:"Otters hold hands while sleeping so they don't drift apart from each other.", isTrue:true,  emoji:"🦦", cat:"Animals", exp:"This is called 'rafting'. They also wrap themselves in kelp as an anchor. Real, adorable, and scientifically documented." },
+  { s:"Scotland's official national animal is a unicorn.", isTrue:true,  emoji:"🦄", cat:"Animals", exp:"Since the 12th century! The unicorn symbolised power and independence in Celtic mythology. Scotland committed to the bit fully." },
+  { s:"A group of flamingos is officially called a 'flamboyance'.", isTrue:true,  emoji:"🦩", cat:"Animals", exp:"It's also called a stand or colony, but flamboyance is the official term. Perfectly on brand for flamingos." },
+  { s:"Butterflies taste everything they land on — including your skin — with their feet.", isTrue:true,  emoji:"🦋", cat:"Animals", exp:"They have chemoreceptors on their feet, 200 times more sensitive than a human tongue. Hope you taste good." },
+  { s:"Sloths can hold their breath longer than dolphins — up to 40 minutes.", isTrue:true,  emoji:"🦥", cat:"Animals", exp:"By slowing their metabolism, sloths can hold their breath for up to 40 minutes. Dolphins max out around 10–15 minutes." },
+  { s:"Male seahorses are the ones who get pregnant and give birth.", isTrue:true,  emoji:"🐠", cat:"Animals", exp:"The female deposits eggs into a brood pouch on the male's belly. He carries them for 2–4 weeks and gives birth to hundreds of tiny seahorses." },
+  { s:"An octopus has three hearts and its blood is blue.", isTrue:true,  emoji:"🐙", cat:"Animals", exp:"Two hearts pump blood to the gills, one to the body. Their blood uses hemocyanin (copper-based) instead of hemoglobin, making it blue." },
+  { s:"Crows can recognise individual human faces and hold grudges against people who upset them.", isTrue:true,  emoji:"🐦‍⬛", cat:"Animals", exp:"Studies show crows not only recognise faces but teach other crows who to be wary of. If you've made a crow angry, it hasn't forgotten." },
+  { s:"A group of crows is officially called a 'murder'.", isTrue:true,  emoji:"🐦", cat:"Animals", exp:"The term dates back centuries, likely from folk tales about crows gathering when one of their own died — like a dark jury. Very gothic." },
+  { s:"Cows have best friends and get stressed when separated from them.", isTrue:true,  emoji:"🐄", cat:"Animals", exp:"Research from Northampton University found cows have lower heart rates and less stress when paired with their preferred companion." },
+  { s:"Penguins propose to their mates by presenting them with a carefully chosen pebble.", isTrue:true,  emoji:"🐧", cat:"Animals", exp:"For Gentoo and Adélie penguins, pebbles are serious currency. The male searches for the perfect one. If she accepts, it goes into the nest." },
+  { s:"Turtles can breathe through their butts.", isTrue:true,  emoji:"🐢", cat:"Animals", exp:"It's called cloacal bursae breathing. In winter, freshwater turtles sit underwater and absorb oxygen through tissue near their tail end." },
+  { s:"Rats laugh when you tickle them, but at a frequency too high for humans to hear.", isTrue:true,  emoji:"🐀", cat:"Animals", exp:"Neuroscientist Jaak Panksepp discovered this in 1999. Rats emit 50kHz chirps when tickled — outside human hearing range. They also seek out tickling." },
+  { s:"Sharks are older than trees. They swam the oceans 50 million years before the first tree evolved.", isTrue:true,  emoji:"🦈", cat:"Animals", exp:"Sharks date back 450 million years. Trees only appeared about 360 million years ago. Sharks outlived the asteroid that killed the dinosaurs." },
+  { s:"Squirrels forget where they buried about half their nuts every year.", isTrue:true,  emoji:"🐿️", cat:"Animals", exp:"Squirrels forget roughly 74% of their caches. Those forgotten nuts frequently grow into new trees, making squirrels one of nature's best tree planters." },
+  { s:"Goldfish have a 3-second memory and forget what happened earlier the same minute.", isTrue:false, emoji:"🐟", cat:"Animals", exp:"Total myth! Goldfish can remember things for at least 3 months. They learn tricks, recognise their owners and anticipate feeding times. The 3-second thing was made up." },
+  { s:"Bats are essentially blind and navigate entirely by sound.", isTrue:false, emoji:"🦇", cat:"Animals", exp:"Bats can see perfectly well — some species have excellent eyesight. Echolocation supplements their vision, especially in the dark. 'Blind as a bat' is nonsense." },
+  { s:"Bulls charge at the colour red. That's why matadors use a red cape.", isTrue:false, emoji:"🐂", cat:"Animals", exp:"Cattle are red-green colourblind. Bulls react to the movement of the cape, not the colour. The cape is red to hide bloodstains. The bull would charge a beige one just as hard." },
+  { s:"Chameleons change colour to camouflage themselves and blend into their surroundings.", isTrue:false, emoji:"🦎", cat:"Animals", exp:"Chameleons actually change colour to communicate — showing mood, regulating temperature, and signalling to other chameleons. Camouflage is a bonus, not the main function." },
 
-  // ANIMALS - FALSE
-  { s: "Goldfish have a 3-second memory and forget what happened earlier the same minute.", isTrue: false, emoji: "🐟", category: "Animals", exp: "Total myth! Goldfish can remember things for at least 3 months. They can learn tricks, recognise their owners and anticipate feeding times. The 3-second thing was a marketing rumour." },
-  { s: "Bats are essentially blind and navigate entirely by sound.", isTrue: false, emoji: "🦇", category: "Animals", exp: "Bats can see perfectly well — some species have excellent eyesight. Echolocation supplements their vision, especially in the dark. 'Blind as a bat' is completely made up." },
-  { s: "Bulls charge at the colour red. That's why matadors use a red cape.", isTrue: false, emoji: "🐂", category: "Animals", exp: "Cattle are red-green colourblind. The bull reacts to the motion of the cape, not the colour. The cape is red to hide bloodstains. The bull would charge a beige cape just as furiously." },
-  { s: "Chameleons change colour to camouflage themselves and blend into surroundings.", isTrue: false, emoji: "🦎", category: "Animals", exp: "Chameleons actually change colour to communicate — mood, temperature regulation, and signalling to other chameleons. Camouflage is a bonus, not the primary function." },
+  // ── SCIENCE ──
+  { s:"The Eiffel Tower grows about 15 centimetres taller every summer due to heat expanding the metal.", isTrue:true,  emoji:"🗼", cat:"Science", exp:"Iron expands when heated. On a hot summer day, the Eiffel Tower's 7,300 tonnes of iron can expand by up to 15cm. In winter, it shrinks back." },
+  { s:"A bolt of lightning is five times hotter than the surface of the Sun.", isTrue:true,  emoji:"⚡", cat:"Science", exp:"The Sun's surface is about 5,500°C. A lightning bolt can reach 30,000°C. The flash is so brief it doesn't ignite things, but it is scorching." },
+  { s:"Bananas are technically berries. Strawberries, however, are not berries at all.", isTrue:true,  emoji:"🍌", cat:"Science", exp:"Botanically, a berry must develop from one flower with one ovary. Bananas qualify. Strawberries develop from multiple ovaries, making them 'accessory fruits'." },
+  { s:"Humans share roughly 50% of their DNA with a banana.", isTrue:true,  emoji:"🧬", cat:"Science", exp:"About 50% of human DNA is shared with bananas. We share 85% with mice and 96% with chimps. Life on Earth is remarkably similar at the molecular level." },
+  { s:"A day on Venus is longer than a year on Venus.", isTrue:true,  emoji:"🪐", cat:"Science", exp:"Venus rotates so slowly that one full spin (its day) takes 243 Earth days. But it orbits the Sun in just 225 Earth days. The year is shorter than the day." },
+  { s:"There are more possible chess games than atoms in the entire observable universe.", isTrue:true,  emoji:"♟️", cat:"Science", exp:"The number of possible chess games (Shannon number) is roughly 10^120. The observable universe contains about 10^80 atoms. Chess wins by a cosmic margin." },
+  { s:"The dot over the letter 'i' has an official name — it's called a 'tittle'.", isTrue:true,  emoji:"📝", cat:"Science", exp:"It's a real typographical term from Latin 'titulus'. The dot over 'j' is also a tittle. Knowing this wins zero arguments but is undeniably a fact." },
+  { s:"You physically cannot hum while holding your nose closed.", isTrue:true,  emoji:"🤫", cat:"Science", exp:"Go ahead, try it. Humming requires air to flow through the nasal cavity. Block the nose and the sound stops immediately." },
+  { s:"Alaska is simultaneously the easternmost, westernmost, AND northernmost U.S. state.", isTrue:true,  emoji:"🗺️", cat:"Science", exp:"Alaska's Aleutian Islands extend past the 180° meridian into the Eastern Hemisphere. This technically makes parts of Alaska further east than any other state, while also being furthest north and west." },
+  { s:"Hot water can freeze faster than cold water under certain conditions.", isTrue:true,  emoji:"🧊", cat:"Science", exp:"The Mpemba Effect. Hot water can freeze faster due to convection currents, evaporation, and dissolved gases escaping. Still debated, but demonstrated in real experiments." },
+  { s:"We only use about 10% of our brains. The rest just sits there doing nothing.", isTrue:false, emoji:"🧠", cat:"Science", exp:"Complete myth. Brain imaging shows virtually all areas are active almost all the time — even during sleep, most of the brain stays busy. 100% is in use." },
+  { s:"Dropping a penny from the top of the Empire State Building could kill someone on the street.", isTrue:false, emoji:"🏢", cat:"Science", exp:"A penny is too light and flat. It tumbles in the air and reaches a terminal velocity of about 25–50 mph — enough to sting, but nowhere near enough to kill. Physics ruins movie myths." },
+  { s:"Glass is actually a very slow-moving liquid — that's why old windows are thicker at the bottom.", isTrue:false, emoji:"🪟", cat:"Science", exp:"Glass is an amorphous solid, not a slow liquid. Old windows are thicker at the bottom because of old manufacturing techniques that made glass uneven — not because it flowed downward." },
+  { s:"The Great Wall of China is visible to the naked eye from space.", isTrue:false, emoji:"🧱", cat:"Science", exp:"One of the most persistent myths. The Wall is far too narrow to see from low Earth orbit without optical aids. Multiple astronauts have confirmed this. The myth has been officially debunked." },
+  { s:"Humans evolved directly from chimpanzees.", isTrue:false, emoji:"🐒", cat:"Science", exp:"Humans and chimps share a common ancestor, but we didn't evolve *from* chimps. Both species evolved separately from that ancestor. Chimps are our cousins, not our parents." },
+  { s:"Cracking your knuckles will give you arthritis if you do it too much.", isTrue:false, emoji:"🤙", cat:"Science", exp:"Multiple studies disprove this. One doctor cracked knuckles on only one hand for 60 years and compared them — no difference. The sound is just gas bubbles popping in the joint fluid." },
 
-  // SCIENCE - TRUE
-  { s: "The Eiffel Tower grows about 15 centimetres taller every summer due to heat expanding the metal.", isTrue: true, emoji: "🗼", category: "Science", exp: "Iron expands when heated. On a hot summer day, the Eiffel Tower's 7,300 tonnes of iron can expand by up to 15cm. In winter, it shrinks back." },
-  { s: "A bolt of lightning is five times hotter than the surface of the Sun.", isTrue: true, emoji: "⚡", category: "Science", exp: "The surface of the Sun is about 5,500°C. A lightning bolt can reach 30,000°C (54,000°F). The flash is so brief it doesn't ignite things, but it's scorching." },
-  { s: "Bananas are technically berries. Strawberries, however, are not berries at all.", isTrue: true, emoji: "🍌", category: "Science", exp: "Botanically, a berry must develop from a single flower with one ovary. Bananas qualify. Strawberries develop from a flower with multiple ovaries, making them 'accessory fruits'." },
-  { s: "Humans share roughly 50% of their DNA with a banana.", isTrue: true, emoji: "🧬", category: "Science", exp: "About 50% of human DNA is shared with bananas. We share 85% with mice, 96% with chimps, and 100% with any other human. Life on Earth is remarkably similar at the molecular level." },
-  { s: "A day on Venus is longer than a year on Venus.", isTrue: true, emoji: "🪐", category: "Science", exp: "Venus rotates so slowly that one full rotation (its day) takes 243 Earth days. But it orbits the Sun in just 225 Earth days. So the year is shorter than the day." },
-  { s: "There are more possible chess games than atoms in the entire observable universe.", isTrue: true, emoji: "♟️", category: "Science", exp: "The Shannon number estimates 10^120 possible chess games. The observable universe contains roughly 10^80 atoms. Chess possibilities win by a cosmic margin." },
-  { s: "The dot over the letter 'i' is called a 'tittle'.", isTrue: true, emoji: "📝", category: "Science", exp: "It's a real typographical term. The tittle (from Latin 'titulus') also refers to the dot over 'j'. Knowing this wins zero arguments but is undeniably useful." },
-  { s: "You physically cannot hum while holding your nose closed.", isTrue: true, emoji: "🤫", category: "Science", exp: "Go ahead, try it. Humming requires air to flow through the nasal cavity. Block the nose and the sound stops. Try it right now — we'll wait." },
-  { s: "Hot water can freeze faster than cold water under certain conditions.", isTrue: true, emoji: "🧊", category: "Science", exp: "The Mpemba Effect. While counterintuitive, hot water can freeze faster due to convection currents, dissolved gases escaping, and other factors. Still debated, but real in specific conditions." },
-  { s: "Alaska is simultaneously the easternmost, westernmost, AND northernmost U.S. state.", isTrue: true, emoji: "🗺️", category: "Science", exp: "Alaska's Aleutian Islands extend past the 180° meridian into the Eastern Hemisphere. By that logic, some of Alaska sits further east than any other state, while also being furthest north and west." },
+  // ── HISTORY ──
+  { s:"Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid.", isTrue:true,  emoji:"🔺", cat:"History", exp:"The Great Pyramid was built around 2560 BC. Cleopatra lived around 69 BC — over 2,400 years after. The Moon landing was 1969, only 2,038 years after Cleopatra. Time is humbling." },
+  { s:"Oxford University is older than the Aztec Empire.", isTrue:true,  emoji:"🏛️", cat:"History", exp:"Oxford started teaching around 1096–1167 AD. The Aztec Empire was founded in 1428. Oxford was already 300+ years old before the Aztecs even existed." },
+  { s:"Nintendo was originally founded as a playing card company — in 1889.", isTrue:true,  emoji:"🃏", cat:"History", exp:"Fusajiro Yamauchi founded Nintendo Koppai in Kyoto to make handmade playing cards. It stayed in cards for 70+ years before pivoting to toys, then video games in the 1970s." },
+  { s:"Woolly mammoths were still alive when the Great Pyramid of Giza was being built.", isTrue:true,  emoji:"🦣", cat:"History", exp:"Most mammoths died out 10,000 years ago, but a dwarf population survived on Wrangel Island until about 1650 BC. The Great Pyramid was completed around 2560 BC — mammoths were still alive then." },
+  { s:"The shortest war in history lasted just 38 to 45 minutes.", isTrue:true,  emoji:"⚔️", cat:"History", exp:"The Anglo-Zanzibar War of 1896. Britain issued an ultimatum; Zanzibar didn't comply. At 9:02am the British fleet opened fire. By 9:40am, Zanzibar had surrendered." },
+  { s:"Napoleon Bonaparte was extremely short — only about 5 feet tall.", isTrue:false, emoji:"👨", cat:"History", exp:"Napoleon was actually 5'7\" (170cm) — average or even slightly above average for a French man of his era. The myth came from British propaganda and a mix-up between French and English inches." },
+  { s:"In Mary Shelley's novel, Frankenstein is the name of the monster.", isTrue:false, emoji:"👹", cat:"History", exp:"Frankenstein is the name of the scientist — Victor Frankenstein. The creature is never given a name in the novel. Calling the monster Frankenstein is one of literature's most common mix-ups." },
+  { s:"Mount Everest is the closest point on Earth to outer space.", isTrue:false, emoji:"🏔️", cat:"History", exp:"Because Earth bulges at the equator, Mount Chimborazo in Ecuador is about 2km closer to outer space than Everest. Everest is only tallest above sea level." },
+  { s:"The Great Fire of London in 1666 killed thousands of people.", isTrue:false, emoji:"🔥", cat:"History", exp:"Remarkably, the Great Fire killed only 6 confirmed people despite destroying 13,200 houses and 87 churches. The medieval buildings burned fast but people had time to flee." },
 
-  // SCIENCE - FALSE
-  { s: "We only use about 10% of our brain. The other 90% just sits there doing nothing.", isTrue: false, emoji: "🧠", category: "Science", exp: "Complete myth. Brain imaging shows that virtually all areas of the brain are active almost all the time. Even during sleep, most of the brain stays busy. 100% is in use." },
-  { s: "Dropping a penny from the top of the Empire State Building could kill someone on the street.", isTrue: false, emoji: "🏢", category: "Science", exp: "A penny is too light and flat. It tumbles in the air, reaches a terminal velocity of about 25-50 mph, and would at worst sting. It would NOT penetrate a skull. Physics ruins movie myths." },
-  { s: "Glass is actually a very slow-moving liquid, which is why old windows are thicker at the bottom.", isTrue: false, emoji: "🪟", category: "Science", exp: "Glass is an amorphous solid, not a slow liquid. Old windows are thicker at the bottom because of old manufacturing techniques that made glass uneven, not because it flowed down." },
-  { s: "The Great Wall of China is visible to the naked eye from space.", isTrue: false, emoji: "🧱", category: "Science", exp: "This is one of the most persistent myths. The Wall is wide enough to walk on, but far too narrow to see from the Moon or even low Earth orbit without optical aids. Astronauts have confirmed this." },
-  { s: "Humans evolved directly from chimpanzees.", isTrue: false, emoji: "🐒", category: "Science", exp: "Humans and chimpanzees share a common ancestor, but we didn't evolve *from* chimps. Both species evolved separately from that ancestor. Chimps are our cousins, not our parents." },
-  { s: "Cracking your knuckles will give you arthritis if you do it too much.", isTrue: false, emoji: "🤙", category: "Science", exp: "Multiple studies disprove this. One doctor even cracked only the knuckles on one hand for 60 years and compared both hands. No difference. The sound is just gas bubbles in the joint fluid." },
-
-  // HISTORY - TRUE
-  { s: "Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid.", isTrue: true, emoji: "🔺", category: "History", exp: "The Great Pyramid was built around 2560 BC. Cleopatra lived around 69 BC — over 2,400 years after. The Moon landing was 1969 — only 2,038 years after Cleopatra. Time is humbling." },
-  { s: "Oxford University is older than the Aztec Empire.", isTrue: true, emoji: "🏛️", category: "History", exp: "Oxford started teaching around 1096–1167 AD. The Aztec Empire was founded in 1428. Oxford has been running for 300+ years longer than the Aztecs existed. Ancient institution." },
-  { s: "Nintendo was originally founded as a playing card company — in 1889.", isTrue: true, emoji: "🃏", category: "History", exp: "Fusajiro Yamauchi founded Nintendo Koppai in Kyoto to make handmade hanafuda playing cards. It stayed in cards for 70+ years before pivoting to toys and then video games in the 1970s." },
-  { s: "Woolly mammoths were still alive when the Great Pyramid of Giza was being built.", isTrue: true, emoji: "🦣", category: "History", exp: "Most mammoths died out 10,000 years ago, but a dwarf population survived on Wrangel Island until about 1650 BC. The Great Pyramid was completed around 2560 BC. Mammoths were still alive then." },
-  { s: "The shortest war in history lasted just 38 to 45 minutes.", isTrue: true, emoji: "⚔️", category: "History", exp: "The Anglo-Zanzibar War of 1896. Britain issued an ultimatum; Zanzibar didn't comply. At 9:02am the British fleet opened fire. By 9:40am, Zanzibar had surrendered. Decisive to say the least." },
-
-  // HISTORY - FALSE
-  { s: "Napoleon Bonaparte was extremely short — only about 5 feet tall.", isTrue: false, emoji: "👨", category: "History", exp: "Napoleon was actually 5 feet 7 inches (170cm) — average or even slightly above average for a French man of his era. The myth came from British propaganda and a confusion between French and English inches." },
-  { s: "In Mary Shelley's novel, Frankenstein is the name of the monster.", isTrue: false, emoji: "👹", category: "History", exp: "Frankenstein is the name of the scientist — Victor Frankenstein. The creature is never named in the novel. Calling the monster 'Frankenstein' is one of literature's most common mix-ups." },
-  { s: "Mount Everest is the closest point on Earth to outer space.", isTrue: false, emoji: "🏔️", category: "History", exp: "Because Earth bulges at the equator, Mount Chimborazo in Ecuador is actually about 2km closer to outer space than Everest. Everest is only the tallest above sea level." },
-
-  // FOOD - TRUE
-  { s: "Honey found inside Egyptian tombs is still perfectly edible after 3,000+ years.", isTrue: true, emoji: "🍯", category: "Food", exp: "Honey is the only food that doesn't spoil. Its low moisture, acidic pH and hydrogen peroxide content make it hostile to bacteria. Archaeologists have tasted 3,000-year-old honey from tombs — it was fine." },
-  { s: "A snail can sleep for up to 3 years at a stretch if conditions require it.", isTrue: true, emoji: "🐌", category: "Food", exp: "Snails hibernate or aestivate to survive cold or drought. They seal themselves in their shell with mucus and can remain dormant for up to 3 years, waking only when conditions improve." },
-  { s: "There are more individual LEGO bricks in existence than there are humans on Earth.", isTrue: true, emoji: "🧱", category: "Random", exp: "LEGO produces about 36 billion bricks a year. There are now more than 400 billion LEGO bricks on the planet — roughly 50 per person alive. They also last roughly 1,300 years before degrading." },
-  { s: "The human nose can distinguish over 1 trillion different smells.", isTrue: true, emoji: "👃", category: "Science", exp: "A 2014 Rockefeller University study found we can detect at least 1 trillion distinct scents — far more than the long-cited figure of 10,000. Our sense of smell is criminally underrated." },
-
-  // FOOD - FALSE
-  { s: "Eating carrots improves your eyesight and can even reverse poor vision.", isTrue: false, emoji: "🥕", category: "Food", exp: "Carrots are rich in Vitamin A, which supports eye health. But if you're not deficient, eating more won't improve your vision. This myth was partly British WWII propaganda to hide radar technology." },
-  { s: "Sugar makes children hyperactive — science has proven this definitively.", isTrue: false, emoji: "🍭", category: "Food", exp: "Multiple double-blind studies have found no link between sugar and hyperactivity in children. Parents perceive their kids as more energetic after sugar, but it's expectation bias at play." },
-  { s: "Different zones of your tongue detect different tastes — sweet at the front, bitter at the back.", isTrue: false, emoji: "👅", category: "Food", exp: "This 'tongue map' has been debunked. All taste buds across the tongue can detect all five basic tastes: sweet, sour, salty, bitter and umami. The diagram in school textbooks was based on a mistranslation." },
-
-  // RANDOM - TRUE
-  { s: "Oxford University has more years of operation than the entire existence of the Aztec civilisation.", isTrue: true, emoji: "⏳", category: "Random", exp: "Oxford has been teaching since roughly 1096 AD — that's 929+ years. The Aztec Empire lasted from 1428 to 1521 — just 93 years. Oxford is ten times older than the Aztecs ever were." },
-  { s: "Alaska is the easternmost US state, because its Aleutian Islands cross the International Date Line.", isTrue: true, emoji: "🌍", category: "Random", exp: "The Aleutian Islands stretch so far west they cross the 180° meridian into the Eastern Hemisphere. Technically this makes parts of Alaska further east than Maine. Geography is surprising." },
-  { s: "Squirrels forget where they buried about half of their nuts every year.", isTrue: true, emoji: "🐿️", category: "Random", exp: "Squirrels don't have perfect spatial memories. They forget roughly 74% of their caches. The forgotten nuts frequently grow into new trees, making squirrels one of nature's most effective tree planters." },
-  { s: "There are more ways to shuffle a standard deck of cards than there are atoms on Earth.", isTrue: true, emoji: "🃏", category: "Random", exp: "The number of ways to arrange 52 cards (52 factorial) is roughly 8×10^67. The number of atoms on Earth is about 10^50. Every shuffle in history has almost certainly been unique." },
+  // ── FOOD ──
+  { s:"Honey found inside Egyptian tombs is still perfectly edible after 3,000 years.", isTrue:true,  emoji:"🍯", cat:"Food", exp:"Honey is the only food that doesn't spoil. Its low moisture, acidic pH and hydrogen peroxide make it hostile to bacteria. Archaeologists have tasted 3,000-year-old tomb honey — it was fine." },
+  { s:"Carrots were originally purple. The orange variety was bred in the Netherlands.", isTrue:true,  emoji:"🥕", cat:"Food", exp:"Wild carrots were originally purple, white, or yellow. Dutch growers in the 17th century cultivated orange carrots, possibly to honour the House of Orange. The orange carrot then took over the world." },
+  { s:"Peanuts are not actually nuts — they're legumes, in the same family as beans and lentils.", isTrue:true,  emoji:"🥜", cat:"Food", exp:"Peanuts grow underground in pods, not on trees like true nuts. They're botanically a legume, making them closer to chickpeas than to almonds or walnuts." },
+  { s:"Eating carrots improves your eyesight and can reverse poor vision.", isTrue:false, emoji:"👁️", cat:"Food", exp:"Carrots are rich in Vitamin A, which supports eye health. But if you're not deficient, eating more won't improve vision. The myth was partly British WWII propaganda to hide radar technology." },
+  { s:"Sugar makes children hyperactive — this has been scientifically proven.", isTrue:false, emoji:"🍭", cat:"Food", exp:"Multiple double-blind studies found no link between sugar and hyperactivity in children. Parents perceive their kids as more energetic after sugar, but it's expectation bias. The science is clear." },
+  { s:"Different zones of the tongue detect different tastes — sweet at front, bitter at back.", isTrue:false, emoji:"👅", cat:"Food", exp:"The 'tongue map' has been completely debunked. All taste buds across the tongue can detect all five tastes: sweet, sour, salty, bitter, and umami. The diagram was based on a mistranslation." },
+  { s:"Chocolate was once used as currency by the Aztecs.", isTrue:true,  emoji:"🍫", cat:"Food", exp:"Cacao beans were so valuable to the Aztecs that they used them as currency. You could buy a turkey for 100 cacao beans. Chocolate was also a drink reserved for warriors and royalty." },
+  { s:"Cucumbers are technically a fruit, not a vegetable.", isTrue:true,  emoji:"🥒", cat:"Food", exp:"Botanically, a fruit is the mature ovary of a flowering plant containing seeds. Cucumbers develop from flowers and contain seeds — so they're fruits. Same goes for tomatoes, peppers, and courgettes." },
 ];
 
-// ══════════════════════════════════════════════════════════
-// GAME STATE
-// ══════════════════════════════════════════════════════════
-const PLAYER_COLORS = ['#7c3aed','#10b981','#f59e0b','#ef4444','#3b82f6','#ec4899','#f97316','#06b6d4'];
+const CATS = ['All','Animals','Science','History','Food'];
+const CAT_EMOJIS = { All:'🎲', Animals:'🐾', Science:'🔬', History:'⏳', Food:'🍽️' };
 
-let state = {
-  players: [],       // [{name, color, score}]
-  totalRounds: 10,
-  currentRound: 0,
-  factQueue: [],     // shuffled facts
-  currentFact: null,
-  votes: {},         // { playerIndex: true/false }
-  currentVoterIndex: 0,
-};
+let pool = [];
+let used = 0;
+let correct = 0;
+let total = 0;
+let current = null;
+let voted = false;
+let activeCat = 'All';
 
-// ══════════════════════════════════════════════════════════
-// SCREEN MANAGEMENT
-// ══════════════════════════════════════════════════════════
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  window.scrollTo(0, 0);
+function init() {
+  // Build category buttons
+  const el = document.getElementById('cats');
+  el.innerHTML = CATS.map(c => `
+    <button class="cat-btn ${c === activeCat ? 'active' : ''}" onclick="selectCat('${c}')">
+      ${CAT_EMOJIS[c]} ${c}
+    </button>`).join('');
+  buildPool();
+  nextFact();
 }
 
-// ══════════════════════════════════════════════════════════
-// LANDING
-// ══════════════════════════════════════════════════════════
-function goToSetup() {
-  showScreen('screen-setup');
-  if (state.players.length === 0) {
-    addPlayer(); addPlayer();
-  }
-  renderPlayerList();
+function selectCat(cat) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.textContent.trim().includes(cat)));
+  buildPool();
+  nextFact();
 }
 
-// ══════════════════════════════════════════════════════════
-// SETUP
-// ══════════════════════════════════════════════════════════
-function addPlayer() {
-  if (state.players.length >= 8) return;
-  const i = state.players.length;
-  state.players.push({ name: '', color: PLAYER_COLORS[i % PLAYER_COLORS.length], score: 0 });
-  renderPlayerList();
-  // focus new input
-  setTimeout(() => {
-    const inputs = document.querySelectorAll('.player-name-input');
-    if (inputs[inputs.length - 1]) inputs[inputs.length - 1].focus();
-  }, 50);
+function buildPool() {
+  const source = activeCat === 'All' ? FACTS : FACTS.filter(f => f.cat === activeCat);
+  pool = shuffle([...source]);
+  used = 0;
 }
 
-function removePlayer(i) {
-  if (state.players.length <= 2) return;
-  state.players.splice(i, 1);
-  // reassign colors
-  state.players.forEach((p, idx) => p.color = PLAYER_COLORS[idx % PLAYER_COLORS.length]);
-  renderPlayerList();
+function nextFact() {
+  if (used >= pool.length) buildPool(); // reshuffle when exhausted
+  current = pool[used++];
+  voted = false;
+
+  document.getElementById('factCard').className = 'fact-card';
+  document.getElementById('factEmoji').textContent = current.emoji;
+  document.getElementById('factText').textContent = current.s;
+  const catEl = document.getElementById('factCat');
+  catEl.textContent = current.cat;
+  catEl.style.display = 'inline-block';
+
+  document.getElementById('btnTruth').className = 'btn-vote btn-truth';
+  document.getElementById('btnLie').className   = 'btn-vote btn-lie';
+  document.getElementById('revealPanel').className = 'reveal-panel';
+  document.getElementById('btnNext').className = 'btn-next';
+  updateCounter();
 }
 
-function renderPlayerList() {
-  const el = document.getElementById('playerList');
-  el.innerHTML = state.players.map((p, i) => `
-    <div class="player-input-row">
-      <div class="player-avatar-sm" style="background:${p.color}">${p.name ? initials(p.name) : (i+1)}</div>
-      <input type="text" class="player-name-input" placeholder="Player ${i+1}" value="${p.name}"
-        oninput="updatePlayerName(${i}, this.value)"
-        onkeydown="if(event.key==='Enter'&&${i}===${state.players.length-1})addPlayer()"
-        style="flex:1">
-      <button class="remove-btn" onclick="removePlayer(${i})" ${state.players.length <= 2 ? 'disabled style="opacity:.3"' : ''}>✕</button>
-    </div>
-  `).join('');
-  document.getElementById('addPlayerBtn').style.display = state.players.length >= 8 ? 'none' : 'flex';
-}
+function vote(guessTrue) {
+  if (voted) return;
+  voted = true;
+  total++;
 
-function updatePlayerName(i, val) {
-  state.players[i].name = val;
-  // update avatar
-  const avatars = document.querySelectorAll('.player-avatar-sm');
-  if (avatars[i]) avatars[i].textContent = val ? initials(val) : (i + 1);
-}
+  const isCorrect = guessTrue === current.isTrue;
+  if (isCorrect) correct++;
 
-function changeRounds(delta) {
-  const options = [5, 8, 10, 15, 20];
-  const cur = options.indexOf(state.totalRounds);
-  const next = Math.max(0, Math.min(options.length - 1, cur + delta));
-  state.totalRounds = options[next];
-  document.getElementById('roundsVal').textContent = state.totalRounds;
-}
+  // Style chosen / dimmed buttons
+  document.getElementById('btnTruth').className = 'btn-vote btn-truth' + (guessTrue  ? ' chosen' : ' dimmed');
+  document.getElementById('btnLie').className   = 'btn-vote btn-lie'   + (!guessTrue ? ' chosen' : ' dimmed');
 
-function startGame() {
-  // Fill in default names for blanks
-  state.players.forEach((p, i) => { if (!p.name.trim()) p.name = `Player ${i + 1}`; });
-  // Validate
-  const names = state.players.map(p => p.name.trim()).filter(Boolean);
-  if (names.length < 2) { alert('Need at least 2 players!'); return; }
-  // Reset scores
-  state.players.forEach(p => p.score = 0);
-  // Build shuffled fact queue (enough for total rounds)
-  const shuffled = shuffle([...FACTS]);
-  state.factQueue = shuffled.slice(0, Math.min(state.totalRounds, shuffled.length));
-  state.currentRound = 0;
-  loadNextRound();
-}
+  // Fact card border
+  document.getElementById('factCard').className = 'fact-card ' + (isCorrect ? 'correct' : 'wrong');
 
-// ══════════════════════════════════════════════════════════
-// GAME ROUND
-// ══════════════════════════════════════════════════════════
-function loadNextRound() {
-  if (state.currentRound >= state.factQueue.length) {
-    showWinner();
-    return;
-  }
-  state.currentFact = state.factQueue[state.currentRound];
-  state.votes = {};
-  state.currentVoterIndex = 0;
-  renderGameScreen();
-  showScreen('screen-game');
-}
+  // Reveal panel
+  const panel = document.getElementById('revealPanel');
+  const verdict = document.getElementById('verdict');
+  const explanation = document.getElementById('explanation');
 
-function renderGameScreen() {
-  const fact = state.currentFact;
-  document.getElementById('roundBadge').textContent = `Round ${state.currentRound + 1} of ${state.factQueue.length}`;
-  document.getElementById('categoryBadge').textContent = fact.category;
-  document.getElementById('factEmoji').textContent = fact.emoji;
-  document.getElementById('factText').textContent = fact.s;
-  const catTag = document.getElementById('factCatTag');
-  catTag.textContent = fact.category;
-  catTag.className = 'fact-category-tag cat-' + fact.category.toLowerCase();
-
-  renderVoteProgress();
-  renderCurrentVoter();
-  document.getElementById('votedOverlay').style.display = 'none';
-  document.getElementById('votingSection').style.display = 'block';
-}
-
-function renderVoteProgress() {
-  const prog = document.getElementById('voteProgress');
-  prog.innerHTML = state.players.map((_, i) => {
-    let cls = 'vote-pip';
-    if (state.votes[i] !== undefined) cls += ' done';
-    else if (i === state.currentVoterIndex) cls += ' active';
-    return `<div class="${cls}"></div>`;
-  }).join('');
-}
-
-function renderCurrentVoter() {
-  const p = state.players[state.currentVoterIndex];
-  const av = document.getElementById('voterAvatar');
-  av.textContent = initials(p.name);
-  av.style.background = p.color;
-  document.getElementById('voterName').textContent = p.name;
-}
-
-function castVote(isTrue) {
-  state.votes[state.currentVoterIndex] = isTrue;
-  const nextIndex = state.currentVoterIndex + 1;
-
-  if (nextIndex >= state.players.length) {
-    // All voted — show brief "passing" screen then go to reveal
-    showReveal();
+  if (isCorrect) {
+    verdict.className = 'verdict v-correct';
+    verdict.textContent = current.isTrue ? '✅ Correct — it\'s TRUE!' : '✅ Correct — it\'s a LIE!';
   } else {
-    // Show "no peeking" overlay briefly, then move to next voter
-    document.getElementById('votingSection').style.display = 'none';
-    const overlay = document.getElementById('votedOverlay');
-    overlay.style.display = 'flex';
-    state.currentVoterIndex = nextIndex;
-    setTimeout(() => {
-      overlay.style.display = 'none';
-      document.getElementById('votingSection').style.display = 'block';
-      renderVoteProgress();
-      renderCurrentVoter();
-    }, 1200);
+    verdict.className = 'verdict v-wrong';
+    verdict.textContent = current.isTrue ? '❌ Wrong — it was TRUE!' : '❌ Wrong — it was a LIE!';
   }
+  explanation.textContent = current.exp;
+  panel.className = 'reveal-panel show';
+
+  document.getElementById('btnNext').className = 'btn-next show';
+  updateCounter();
 }
 
-// ══════════════════════════════════════════════════════════
-// REVEAL
-// ══════════════════════════════════════════════════════════
-function showReveal() {
-  const fact = state.currentFact;
-
-  // Award points
-  Object.entries(state.votes).forEach(([idx, vote]) => {
-    if (vote === fact.isTrue) {
-      state.players[parseInt(idx)].score++;
-    }
-  });
-
-  // Verdict badge
-  const badge = document.getElementById('verdictBadge');
-  if (fact.isTrue) {
-    badge.textContent = '✅ TRUE!';
-    badge.className = 'verdict-badge verdict-truth';
+function updateCounter() {
+  const el = document.getElementById('scoreChip');
+  el.textContent = `${correct} / ${total}`;
+  const counter = document.getElementById('counter');
+  if (total > 0) {
+    const pct = Math.round(correct / total * 100);
+    counter.textContent = `${pct}% correct across ${total} fact${total !== 1 ? 's' : ''}`;
   } else {
-    badge.textContent = '❌ LIE!';
-    badge.className = 'verdict-badge verdict-lie';
+    counter.textContent = '';
   }
-  document.getElementById('revealStatement').textContent = fact.s;
-  document.getElementById('revealExplanation').textContent = fact.exp;
-
-  // Results list
-  const list = document.getElementById('resultsList');
-  list.innerHTML = state.players.map((p, i) => {
-    const vote = state.votes[i];
-    const correct = vote === fact.isTrue;
-    const voteLabel = vote ? 'Truth' : 'Lie';
-    const voteClass = vote ? 'vote-truth-tag' : 'vote-lie-tag';
-    return `<div class="result-row" style="animation-delay:${i * 0.08}s">
-      <div class="result-avatar" style="background:${p.color}">${initials(p.name)}</div>
-      <div class="result-name">${p.name}</div>
-      <span class="result-vote ${voteClass}">${voteLabel}</span>
-      <span class="result-status">${correct ? '✅' : '❌'}</span>
-      <span class="result-points">${correct ? '+1' : ''}</span>
-    </div>`;
-  }).join('');
-
-  // Next button label
-  const isLast = state.currentRound + 1 >= state.factQueue.length;
-  document.getElementById('nextBtn').textContent = isLast ? 'See Final Scores 🏆' : 'Next Round →';
-
-  showScreen('screen-reveal');
-}
-
-function nextRound() {
-  state.currentRound++;
-  // Show mid-game scoreboard every 5 rounds (but not at end)
-  const isLast = state.currentRound >= state.factQueue.length;
-  if (!isLast && state.currentRound % 5 === 0) {
-    showScores(false);
-  } else if (isLast) {
-    showWinner();
-  } else {
-    loadNextRound();
-  }
-}
-
-// ══════════════════════════════════════════════════════════
-// SCORES
-// ══════════════════════════════════════════════════════════
-function showScores(isFinal) {
-  const sorted = [...state.players].sort((a, b) => b.score - a.score);
-  const maxScore = Math.max(...sorted.map(p => p.score), 1);
-
-  document.getElementById('scoresSubtitle').textContent = `After Round ${state.currentRound} of ${state.factQueue.length}`;
-
-  const list = document.getElementById('scoresList');
-  list.innerHTML = sorted.map((p, i) => {
-    const rankCls = i === 0 ? 'gold' : i === 1 ? 'silver' : i === 2 ? 'bronze' : '';
-    const rankIcon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
-    const pct = Math.round((p.score / maxScore) * 100);
-    return `<div class="score-row ${i === 0 ? 'leader' : ''}">
-      <div class="score-rank ${rankCls}">${rankIcon}</div>
-      <div class="score-avatar" style="background:${p.color}">${initials(p.name)}</div>
-      <div style="flex:1">
-        <div class="score-name">${p.name}</div>
-        <div style="margin-top:6px">
-          <div class="score-bar-bg"><div class="score-bar-fill" style="width:${pct}%"></div></div>
-        </div>
-      </div>
-      <div style="text-align:right">
-        <div class="score-pts">${p.score}</div>
-        <div class="score-pts-label">pts</div>
-      </div>
-    </div>`;
-  }).join('');
-
-  document.getElementById('continueBtn').textContent = 'Continue Playing →';
-  showScreen('screen-scores');
-}
-
-function continueGame() {
-  loadNextRound();
-}
-
-// ══════════════════════════════════════════════════════════
-// WINNER
-// ══════════════════════════════════════════════════════════
-function showWinner() {
-  const sorted = [...state.players].sort((a, b) => b.score - a.score);
-  const winner = sorted[0];
-
-  document.getElementById('winnerName').textContent = winner.name;
-  document.getElementById('winnerScore').textContent = `${winner.score} / ${state.factQueue.length}`;
-
-  const finalList = document.getElementById('finalScoresList');
-  finalList.innerHTML = sorted.map((p, i) => {
-    const medal = ['🥇','🥈','🥉'][i] || `#${i+1}`;
-    return `<div class="final-score-row">
-      <span style="font-size:18px">${medal}</span>
-      <div class="result-avatar" style="width:32px;height:32px;background:${p.color};border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">${initials(p.name)}</div>
-      <span style="flex:1;font-weight:600">${p.name}</span>
-      <span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--amber)">${p.score} pts</span>
-    </div>`;
-  }).join('');
-
-  launchConfetti();
-  showScreen('screen-winner');
-}
-
-function playAgain() {
-  stopConfetti();
-  // Keep players, reset scores
-  state.players.forEach(p => p.score = 0);
-  state.currentRound = 0;
-  const shuffled = shuffle([...FACTS]);
-  state.factQueue = shuffled.slice(0, Math.min(state.totalRounds, shuffled.length));
-  loadNextRound();
-}
-
-// ══════════════════════════════════════════════════════════
-// CONFETTI
-// ══════════════════════════════════════════════════════════
-let confettiInterval = null;
-
-function launchConfetti() {
-  const container = document.getElementById('confettiRain');
-  container.innerHTML = '';
-  let count = 0;
-  confettiInterval = setInterval(() => {
-    if (count++ > 80) { clearInterval(confettiInterval); return; }
-    const piece = document.createElement('div');
-    piece.className = `confetti-piece cc-${Math.ceil(Math.random() * 6)}`;
-    piece.style.left = Math.random() * 100 + 'vw';
-    piece.style.top = '-20px';
-    piece.style.width = (8 + Math.random() * 8) + 'px';
-    piece.style.height = (8 + Math.random() * 8) + 'px';
-    piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
-    piece.style.animationDuration = (2 + Math.random() * 3) + 's';
-    piece.style.animationDelay = Math.random() * 0.5 + 's';
-    container.appendChild(piece);
-    setTimeout(() => piece.remove(), 5000);
-  }, 60);
-}
-
-function stopConfetti() {
-  clearInterval(confettiInterval);
-  document.getElementById('confettiRain').innerHTML = '';
-}
-
-// ══════════════════════════════════════════════════════════
-// UTILS
-// ══════════════════════════════════════════════════════════
-function initials(name) {
-  return name.trim().split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
 function shuffle(arr) {
@@ -1017,6 +375,8 @@ function shuffle(arr) {
   }
   return arr;
 }
+
+init();
 </script>
 </body>
 </html>
