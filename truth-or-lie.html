@@ -4,65 +4,59 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Truth or Lie? 🤔</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0d0d1a;
-    --card: #1c1c38;
+    --bg:     #0d0d1a;
+    --card:   #1c1c38;
     --border: rgba(124,58,237,0.2);
     --purple: #7c3aed;
-    --purple-light: #a855f7;
-    --amber: #f59e0b;
-    --green: #10b981;
-    --red: #ef4444;
-    --text: #f1f5f9;
-    --muted: #94a3b8;
+    --purple2:#a855f7;
+    --amber:  #f59e0b;
+    --green:  #10b981;
+    --red:    #ef4444;
+    --text:   #f1f5f9;
+    --muted:  #94a3b8;
   }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 20px 48px;
+    padding: 24px 16px 60px;
   }
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background: radial-gradient(ellipse at 30% 0%, rgba(124,58,237,0.1) 0%, transparent 60%);
-    pointer-events: none;
-  }
-
-  .wrap { width: 100%; max-width: 540px; position: relative; z-index: 1; }
+  .wrap { width: 100%; max-width: 540px; }
 
   /* HEADER */
   .header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 28px;
   }
-  .logo {
-    font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800;
-  }
-  .logo em { font-style: normal; color: var(--purple-light); }
-  .score-chip {
-    font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-    background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.25);
-    color: var(--purple-light); padding: 6px 14px; border-radius: 20px;
+  .logo { font-size: 20px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: var(--purple2); }
+  .score-pill {
+    font-size: 13px; font-weight: 700;
+    background: rgba(124,58,237,0.15);
+    border: 1px solid rgba(124,58,237,0.3);
+    color: var(--purple2);
+    padding: 5px 14px; border-radius: 20px;
   }
 
-  /* CATEGORY PILLS */
-  .cat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px; }
-  .cats {
-    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px;
+  /* CATEGORIES */
+  .cat-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--muted); margin-bottom: 10px;
   }
+  .cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
   .cat-btn {
-    padding: 8px 16px; border-radius: 20px; border: 1.5px solid rgba(255,255,255,0.1);
-    background: transparent; color: var(--muted); cursor: pointer;
-    font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500;
-    transition: all 0.15s;
+    padding: 8px 16px; border-radius: 20px;
+    border: 1.5px solid rgba(255,255,255,0.12);
+    background: transparent; color: var(--muted);
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
   }
   .cat-btn:hover { border-color: var(--purple); color: var(--text); }
   .cat-btn.active {
@@ -72,121 +66,78 @@
 
   /* FACT CARD */
   .fact-card {
-    background: var(--card); border: 1.5px solid var(--border);
-    border-radius: 24px; padding: 28px 24px; margin-bottom: 20px;
-    min-height: 180px; display: flex; flex-direction: column; justify-content: center;
-    transition: border-color 0.4s;
-    position: relative; overflow: hidden;
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 22px; padding: 26px 22px;
+    margin-bottom: 16px; min-height: 170px;
+    display: flex; flex-direction: column; justify-content: center;
+    transition: border-color 0.35s;
   }
-  .fact-card.correct { border-color: rgba(16,185,129,0.6); }
-  .fact-card.wrong   { border-color: rgba(239,68,68,0.6); }
-  .fact-card::before {
-    content: '';
-    position: absolute; top: -40px; right: -40px;
-    width: 160px; height: 160px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .fact-emoji { font-size: 40px; margin-bottom: 14px; }
-  .fact-text {
-    font-family: 'Syne', sans-serif; font-size: clamp(17px, 4vw, 22px);
-    font-weight: 700; line-height: 1.45; color: var(--text);
-  }
-  .fact-cat {
+  .fact-card.is-correct { border-color: rgba(16,185,129,0.6); }
+  .fact-card.is-wrong   { border-color: rgba(239,68,68,0.6); }
+  .fact-emoji { font-size: 38px; margin-bottom: 14px; line-height: 1; }
+  .fact-text  { font-size: clamp(16px, 4vw, 21px); font-weight: 700; line-height: 1.45; }
+  .fact-tag {
     display: inline-block; margin-top: 14px;
     font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em;
-    color: var(--purple-light); background: rgba(124,58,237,0.1);
+    color: var(--purple2); background: rgba(124,58,237,0.1);
     padding: 4px 10px; border-radius: 20px;
   }
 
   /* VOTE BUTTONS */
-  .vote-row {
-    display: flex; gap: 12px; margin-bottom: 16px;
-  }
-  .btn-vote {
-    flex: 1; padding: 18px; border-radius: 16px; border: none; cursor: pointer;
-    font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px;
+  .vote-row { display: flex; gap: 12px; margin-bottom: 14px; }
+  .btn-truth, .btn-lie {
+    flex: 1; padding: 18px 10px; border: none; border-radius: 16px;
+    font-size: 18px; font-weight: 800; cursor: pointer;
     transition: transform 0.12s, box-shadow 0.2s, opacity 0.2s;
   }
-  .btn-vote:active { transform: scale(0.95); }
-  .btn-truth {
-    background: var(--green); color: #fff;
-    box-shadow: 0 0 28px rgba(16,185,129,0.25);
-  }
-  .btn-truth:hover { box-shadow: 0 0 44px rgba(16,185,129,0.45); }
-  .btn-lie {
-    background: var(--red); color: #fff;
-    box-shadow: 0 0 28px rgba(239,68,68,0.25);
-  }
-  .btn-lie:hover { box-shadow: 0 0 44px rgba(239,68,68,0.45); }
-  .btn-vote.dimmed { opacity: 0.35; transform: scale(0.97); cursor: default; }
-  .btn-vote.chosen { transform: scale(1.03); }
+  .btn-truth { background: var(--green); color: #fff; box-shadow: 0 0 24px rgba(16,185,129,0.2); }
+  .btn-lie   { background: var(--red);   color: #fff; box-shadow: 0 0 24px rgba(239,68,68,0.2); }
+  .btn-truth:hover { box-shadow: 0 0 40px rgba(16,185,129,0.4); }
+  .btn-lie:hover   { box-shadow: 0 0 40px rgba(239,68,68,0.4); }
+  .btn-truth:active, .btn-lie:active { transform: scale(0.95); }
+  .btn-truth.chosen { transform: scale(1.04); box-shadow: 0 0 44px rgba(16,185,129,0.5); }
+  .btn-lie.chosen   { transform: scale(1.04); box-shadow: 0 0 44px rgba(239,68,68,0.5); }
+  .btn-truth.faded, .btn-lie.faded { opacity: 0.3; cursor: default; transform: scale(0.97); }
 
-  /* REVEAL PANEL */
-  .reveal-panel {
+  /* REVEAL */
+  .reveal {
     display: none;
     background: var(--card); border: 1.5px solid var(--border);
-    border-radius: 20px; padding: 20px 22px; margin-bottom: 16px;
-    animation: slideUp 0.35s cubic-bezier(0.34,1.4,0.64,1);
+    border-radius: 18px; padding: 20px 20px; margin-bottom: 14px;
   }
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(16px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
+  .reveal.show { display: block; animation: popUp 0.3s cubic-bezier(0.34,1.5,0.64,1); }
+  @keyframes popUp {
+    from { opacity: 0; transform: scale(0.95) translateY(8px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
   }
-  .reveal-panel.show { display: block; }
-  .verdict {
-    font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 800;
-    margin-bottom: 10px;
-  }
-  .verdict.v-correct { color: var(--green); }
-  .verdict.v-wrong   { color: var(--red); }
-  .verdict.v-neutral { color: var(--amber); }
-  .explanation {
+  .verdict { font-size: 24px; font-weight: 800; margin-bottom: 10px; }
+  .verdict.correct { color: var(--green); }
+  .verdict.wrong   { color: var(--red); }
+  .explain {
     font-size: 14px; color: var(--muted); line-height: 1.65;
-    border-left: 3px solid var(--purple); padding-left: 14px;
+    padding-left: 14px; border-left: 3px solid var(--purple);
   }
 
-  /* NEXT BUTTON */
+  /* NEXT */
   .btn-next {
-    width: 100%; padding: 16px; border-radius: 16px; border: none; cursor: pointer;
-    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px;
+    display: none; width: 100%; padding: 16px; border: none; border-radius: 16px;
     background: var(--purple); color: #fff;
-    box-shadow: 0 0 28px rgba(124,58,237,0.3);
-    transition: box-shadow 0.2s, transform 0.12s;
-    display: none;
+    font-size: 16px; font-weight: 700; cursor: pointer;
+    box-shadow: 0 0 24px rgba(124,58,237,0.3);
+    transition: box-shadow 0.2s, transform 0.1s;
   }
-  .btn-next:hover { box-shadow: 0 0 44px rgba(124,58,237,0.5); }
+  .btn-next:hover { box-shadow: 0 0 40px rgba(124,58,237,0.5); }
   .btn-next:active { transform: scale(0.97); }
-  .btn-next.show { display: block; animation: fadeIn 0.3s ease; }
+  .btn-next.show { display: block; animation: fadeIn 0.25s ease; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-  /* COUNTER */
-  .counter {
+  .tally {
     text-align: center; font-size: 13px; color: var(--muted); margin-top: 16px;
   }
-  .counter strong { color: var(--text); }
 
-  @media (max-width: 400px) {
-    .btn-vote { font-size: 16px; padding: 16px 10px; }
-  }
-
-  /* QR */
-  .qr-btn {
-    font-size: 20px; background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
-    width: 38px; height: 38px; cursor: pointer; transition: background 0.15s;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .qr-btn:hover { background: rgba(255,255,255,0.12); }
-  .qr-panel {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-    z-index: 100; display: flex; align-items: center; justify-content: center;
-    animation: fadeIn 0.2s ease;
-  }
-  .qr-inner {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 20px; padding: 24px;
-    display: flex; flex-direction: column; align-items: center;
+  @media (max-width: 380px) {
+    .btn-truth, .btn-lie { font-size: 15px; padding: 16px 8px; }
   }
 </style>
 </head>
@@ -194,23 +145,8 @@
 <div class="wrap">
 
   <div class="header">
-    <div class="logo">Truth or <em>Lie?</em> 🤔</div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="qr-btn" onclick="toggleQR()" title="Open on phone">📱</button>
-      <div class="score-chip" id="scoreChip">0 / 0</div>
-    </div>
-  </div>
-
-  <!-- QR panel -->
-  <div class="qr-panel" id="qrPanel" style="display:none">
-    <div class="qr-inner">
-      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Scan to open on your phone</div>
-      <img id="qrImg" src="" alt="QR Code" style="width:160px;height:160px;border-radius:12px;background:#fff;padding:8px">
-      <div style="font-size:11px;color:var(--muted);margin-top:10px;max-width:200px;text-align:center;line-height:1.5">
-        Or <strong>email / AirDrop</strong> the downloaded .html file to yourself
-      </div>
-      <button onclick="toggleQR()" style="margin-top:12px;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--muted);padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px">Close</button>
-    </div>
+    <div class="logo">Truth or <span>Lie?</span> 🤔</div>
+    <div class="score-pill" id="scorePill">0 / 0</div>
   </div>
 
   <div class="cat-label">Pick a category</div>
@@ -218,162 +154,177 @@
 
   <div class="fact-card" id="factCard">
     <div class="fact-emoji" id="factEmoji">🎲</div>
-    <div class="fact-text" id="factText">Tap a category above to start!</div>
-    <span class="fact-cat" id="factCat" style="display:none"></span>
+    <div class="fact-text"  id="factText">Pick a category above to start!</div>
+    <span class="fact-tag"  id="factTag"></span>
   </div>
 
-  <div class="vote-row" id="voteRow">
-    <button class="btn-vote btn-truth" id="btnTruth" onclick="vote(true)">✅ Truth</button>
-    <button class="btn-vote btn-lie"   id="btnLie"   onclick="vote(false)">❌ Lie</button>
+  <div class="vote-row">
+    <button class="btn-truth" id="btnTruth">✅ Truth</button>
+    <button class="btn-lie"   id="btnLie">❌ Lie</button>
   </div>
 
-  <div class="reveal-panel" id="revealPanel">
+  <div class="reveal" id="reveal">
     <div class="verdict" id="verdict"></div>
-    <div class="explanation" id="explanation"></div>
+    <div class="explain" id="explain"></div>
   </div>
 
-  <button class="btn-next" id="btnNext" onclick="nextFact()">Next Fact →</button>
+  <button class="btn-next" id="btnNext">Next Fact →</button>
 
-  <div class="counter" id="counter"></div>
+  <div class="tally" id="tally"></div>
 
 </div>
 
 <script>
-const FACTS = [
-  // ── ANIMALS ──
-  { s:"Wombat poop is perfectly cube-shaped. It's the only animal in the world that produces cube-shaped droppings.", isTrue:true,  emoji:"🐨", cat:"Animals", exp:"Wombats produce about 80–100 cubes per night. Scientists discovered their elastic intestines create this shape so droppings stack on rocks and don't roll away." },
-  { s:"Otters hold hands while sleeping so they don't drift apart from each other.", isTrue:true,  emoji:"🦦", cat:"Animals", exp:"This is called 'rafting'. They also wrap themselves in kelp as an anchor. Real, adorable, and scientifically documented." },
-  { s:"Scotland's official national animal is a unicorn.", isTrue:true,  emoji:"🦄", cat:"Animals", exp:"Since the 12th century! The unicorn symbolised power and independence in Celtic mythology. Scotland committed to the bit fully." },
-  { s:"A group of flamingos is officially called a 'flamboyance'.", isTrue:true,  emoji:"🦩", cat:"Animals", exp:"It's also called a stand or colony, but flamboyance is the official term. Perfectly on brand for flamingos." },
-  { s:"Butterflies taste everything they land on — including your skin — with their feet.", isTrue:true,  emoji:"🦋", cat:"Animals", exp:"They have chemoreceptors on their feet, 200 times more sensitive than a human tongue. Hope you taste good." },
-  { s:"Sloths can hold their breath longer than dolphins — up to 40 minutes.", isTrue:true,  emoji:"🦥", cat:"Animals", exp:"By slowing their metabolism, sloths can hold their breath for up to 40 minutes. Dolphins max out around 10–15 minutes." },
-  { s:"Male seahorses are the ones who get pregnant and give birth.", isTrue:true,  emoji:"🐠", cat:"Animals", exp:"The female deposits eggs into a brood pouch on the male's belly. He carries them for 2–4 weeks and gives birth to hundreds of tiny seahorses." },
-  { s:"An octopus has three hearts and its blood is blue.", isTrue:true,  emoji:"🐙", cat:"Animals", exp:"Two hearts pump blood to the gills, one to the body. Their blood uses hemocyanin (copper-based) instead of hemoglobin, making it blue." },
-  { s:"Crows can recognise individual human faces and hold grudges against people who upset them.", isTrue:true,  emoji:"🐦‍⬛", cat:"Animals", exp:"Studies show crows not only recognise faces but teach other crows who to be wary of. If you've made a crow angry, it hasn't forgotten." },
-  { s:"A group of crows is officially called a 'murder'.", isTrue:true,  emoji:"🐦", cat:"Animals", exp:"The term dates back centuries, likely from folk tales about crows gathering when one of their own died — like a dark jury. Very gothic." },
-  { s:"Cows have best friends and get stressed when separated from them.", isTrue:true,  emoji:"🐄", cat:"Animals", exp:"Research from Northampton University found cows have lower heart rates and less stress when paired with their preferred companion." },
-  { s:"Penguins propose to their mates by presenting them with a carefully chosen pebble.", isTrue:true,  emoji:"🐧", cat:"Animals", exp:"For Gentoo and Adélie penguins, pebbles are serious currency. The male searches for the perfect one. If she accepts, it goes into the nest." },
-  { s:"Turtles can breathe through their butts.", isTrue:true,  emoji:"🐢", cat:"Animals", exp:"It's called cloacal bursae breathing. In winter, freshwater turtles sit underwater and absorb oxygen through tissue near their tail end." },
-  { s:"Rats laugh when you tickle them, but at a frequency too high for humans to hear.", isTrue:true,  emoji:"🐀", cat:"Animals", exp:"Neuroscientist Jaak Panksepp discovered this in 1999. Rats emit 50kHz chirps when tickled — outside human hearing range. They also seek out tickling." },
-  { s:"Sharks are older than trees. They swam the oceans 50 million years before the first tree evolved.", isTrue:true,  emoji:"🦈", cat:"Animals", exp:"Sharks date back 450 million years. Trees only appeared about 360 million years ago. Sharks outlived the asteroid that killed the dinosaurs." },
-  { s:"Squirrels forget where they buried about half their nuts every year.", isTrue:true,  emoji:"🐿️", cat:"Animals", exp:"Squirrels forget roughly 74% of their caches. Those forgotten nuts frequently grow into new trees, making squirrels one of nature's best tree planters." },
-  { s:"Goldfish have a 3-second memory and forget what happened earlier the same minute.", isTrue:false, emoji:"🐟", cat:"Animals", exp:"Total myth! Goldfish can remember things for at least 3 months. They learn tricks, recognise their owners and anticipate feeding times. The 3-second thing was made up." },
-  { s:"Bats are essentially blind and navigate entirely by sound.", isTrue:false, emoji:"🦇", cat:"Animals", exp:"Bats can see perfectly well — some species have excellent eyesight. Echolocation supplements their vision, especially in the dark. 'Blind as a bat' is nonsense." },
-  { s:"Bulls charge at the colour red. That's why matadors use a red cape.", isTrue:false, emoji:"🐂", cat:"Animals", exp:"Cattle are red-green colourblind. Bulls react to the movement of the cape, not the colour. The cape is red to hide bloodstains. The bull would charge a beige one just as hard." },
-  { s:"Chameleons change colour to camouflage themselves and blend into their surroundings.", isTrue:false, emoji:"🦎", cat:"Animals", exp:"Chameleons actually change colour to communicate — showing mood, regulating temperature, and signalling to other chameleons. Camouflage is a bonus, not the main function." },
+var FACTS = [
+  // ANIMALS
+  { s:"Wombat poop is perfectly cube-shaped — it's the only animal in the world that produces cube droppings.", isTrue:true,  e:"🐨", cat:"Animals", x:"Wombats produce about 80–100 cubes per night. Their elastic intestines create this shape so droppings don't roll off rocks." },
+  { s:"Otters hold hands while sleeping so they don't drift apart from each other.", isTrue:true,  e:"🦦", cat:"Animals", x:"This is called 'rafting'. They also wrap themselves in kelp as an anchor. Real, adorable, and scientifically documented." },
+  { s:"Scotland's official national animal is a unicorn.", isTrue:true,  e:"🦄", cat:"Animals", x:"Since the 12th century! The unicorn symbolised power and independence in Celtic mythology. Scotland fully committed to the bit." },
+  { s:"A group of flamingos is officially called a 'flamboyance'.", isTrue:true,  e:"🦩", cat:"Animals", x:"Also called a stand or colony, but flamboyance is the official term. Perfectly on brand." },
+  { s:"Butterflies taste everything they land on — including your skin — with their feet.", isTrue:true,  e:"🦋", cat:"Animals", x:"They have chemoreceptors on their feet, 200 times more sensitive than a human tongue. Hope you taste good." },
+  { s:"Sloths can hold their breath longer than dolphins — up to 40 minutes.", isTrue:true,  e:"🦥", cat:"Animals", x:"By slowing their metabolism, sloths can hold their breath up to 40 minutes underwater. Dolphins max out at 10–15 minutes." },
+  { s:"Male seahorses are the ones who get pregnant and give birth.", isTrue:true,  e:"🐠", cat:"Animals", x:"The female deposits eggs into a pouch on the male's belly. He carries them for 2–4 weeks and gives birth to hundreds of tiny seahorses." },
+  { s:"An octopus has three hearts and its blood is blue.", isTrue:true,  e:"🐙", cat:"Animals", x:"Two hearts pump blood to the gills, one to the body. Their blood uses copper-based hemocyanin instead of iron-based hemoglobin — making it blue." },
+  { s:"Crows can recognise individual human faces and hold grudges against people who upset them.", isTrue:true,  e:"🐦", cat:"Animals", x:"Studies show crows recognise faces and teach other crows who to avoid. If you've made a crow angry, it hasn't forgotten." },
+  { s:"Cows have best friends and get stressed when separated from them.", isTrue:true,  e:"🐄", cat:"Animals", x:"Research from Northampton University found cows have lower heart rates and less stress when with their preferred companion." },
+  { s:"Penguins propose to their mates by presenting a carefully chosen pebble.", isTrue:true,  e:"🐧", cat:"Animals", x:"For Gentoo and Adelie penguins, pebbles are serious currency. The male finds the best one and presents it. If she accepts, it goes into the nest." },
+  { s:"Turtles can breathe through their butts.", isTrue:true,  e:"🐢", cat:"Animals", x:"It's called cloacal bursae breathing. In winter, freshwater turtles absorb oxygen through tissue near their tail end while sitting underwater." },
+  { s:"Rats laugh when you tickle them, at a frequency too high for humans to hear.", isTrue:true,  e:"🐀", cat:"Animals", x:"Discovered in 1999. Rats emit 50kHz chirps when tickled — outside human hearing range. They also seek out tickling." },
+  { s:"Sharks are older than trees — they swam the oceans millions of years before the first tree evolved.", isTrue:true,  e:"🦈", cat:"Animals", x:"Sharks date back 450 million years. Trees only appeared about 360 million years ago. Sharks outlived the dinosaur extinction." },
+  { s:"Squirrels forget where they buried about half their nuts every year.", isTrue:true,  e:"🐿", cat:"Animals", x:"Squirrels forget roughly 74% of their caches. The forgotten nuts frequently grow into new trees — making squirrels great tree planters." },
+  { s:"Goldfish have a 3-second memory.", isTrue:false, e:"🐟", cat:"Animals", x:"Total myth. Goldfish can remember things for at least 3 months, learn tricks, recognise owners, and anticipate feeding times. The 3-second thing was made up." },
+  { s:"Bats are essentially blind and navigate entirely by sound.", isTrue:false, e:"🦇", cat:"Animals", x:"Bats can see perfectly well — some have excellent eyesight. Echolocation supplements vision in the dark. Blind as a bat is nonsense." },
+  { s:"Bulls charge at red because it angers them — that's why matadors use a red cape.", isTrue:false, e:"🐂", cat:"Animals", x:"Cattle are red-green colourblind. Bulls react to the cape's movement, not its colour. The red hides bloodstains. A beige cape works just as well." },
+  { s:"Chameleons change colour to blend into their surroundings as camouflage.", isTrue:false, e:"🦎", cat:"Animals", x:"Chameleons change colour mainly to communicate mood, regulate temperature, and signal to other chameleons. Camouflage is a bonus, not the main purpose." },
 
-  // ── SCIENCE ──
-  { s:"The Eiffel Tower grows about 15 centimetres taller every summer due to heat expanding the metal.", isTrue:true,  emoji:"🗼", cat:"Science", exp:"Iron expands when heated. On a hot summer day, the Eiffel Tower's 7,300 tonnes of iron can expand by up to 15cm. In winter, it shrinks back." },
-  { s:"A bolt of lightning is five times hotter than the surface of the Sun.", isTrue:true,  emoji:"⚡", cat:"Science", exp:"The Sun's surface is about 5,500°C. A lightning bolt can reach 30,000°C. The flash is so brief it doesn't ignite things, but it is scorching." },
-  { s:"Bananas are technically berries. Strawberries, however, are not berries at all.", isTrue:true,  emoji:"🍌", cat:"Science", exp:"Botanically, a berry must develop from one flower with one ovary. Bananas qualify. Strawberries develop from multiple ovaries, making them 'accessory fruits'." },
-  { s:"Humans share roughly 50% of their DNA with a banana.", isTrue:true,  emoji:"🧬", cat:"Science", exp:"About 50% of human DNA is shared with bananas. We share 85% with mice and 96% with chimps. Life on Earth is remarkably similar at the molecular level." },
-  { s:"A day on Venus is longer than a year on Venus.", isTrue:true,  emoji:"🪐", cat:"Science", exp:"Venus rotates so slowly that one full spin (its day) takes 243 Earth days. But it orbits the Sun in just 225 Earth days. The year is shorter than the day." },
-  { s:"There are more possible chess games than atoms in the entire observable universe.", isTrue:true,  emoji:"♟️", cat:"Science", exp:"The number of possible chess games (Shannon number) is roughly 10^120. The observable universe contains about 10^80 atoms. Chess wins by a cosmic margin." },
-  { s:"The dot over the letter 'i' has an official name — it's called a 'tittle'.", isTrue:true,  emoji:"📝", cat:"Science", exp:"It's a real typographical term from Latin 'titulus'. The dot over 'j' is also a tittle. Knowing this wins zero arguments but is undeniably a fact." },
-  { s:"You physically cannot hum while holding your nose closed.", isTrue:true,  emoji:"🤫", cat:"Science", exp:"Go ahead, try it. Humming requires air to flow through the nasal cavity. Block the nose and the sound stops immediately." },
-  { s:"Alaska is simultaneously the easternmost, westernmost, AND northernmost U.S. state.", isTrue:true,  emoji:"🗺️", cat:"Science", exp:"Alaska's Aleutian Islands extend past the 180° meridian into the Eastern Hemisphere. This technically makes parts of Alaska further east than any other state, while also being furthest north and west." },
-  { s:"Hot water can freeze faster than cold water under certain conditions.", isTrue:true,  emoji:"🧊", cat:"Science", exp:"The Mpemba Effect. Hot water can freeze faster due to convection currents, evaporation, and dissolved gases escaping. Still debated, but demonstrated in real experiments." },
-  { s:"We only use about 10% of our brains. The rest just sits there doing nothing.", isTrue:false, emoji:"🧠", cat:"Science", exp:"Complete myth. Brain imaging shows virtually all areas are active almost all the time — even during sleep, most of the brain stays busy. 100% is in use." },
-  { s:"Dropping a penny from the top of the Empire State Building could kill someone on the street.", isTrue:false, emoji:"🏢", cat:"Science", exp:"A penny is too light and flat. It tumbles in the air and reaches a terminal velocity of about 25–50 mph — enough to sting, but nowhere near enough to kill. Physics ruins movie myths." },
-  { s:"Glass is actually a very slow-moving liquid — that's why old windows are thicker at the bottom.", isTrue:false, emoji:"🪟", cat:"Science", exp:"Glass is an amorphous solid, not a slow liquid. Old windows are thicker at the bottom because of old manufacturing techniques that made glass uneven — not because it flowed downward." },
-  { s:"The Great Wall of China is visible to the naked eye from space.", isTrue:false, emoji:"🧱", cat:"Science", exp:"One of the most persistent myths. The Wall is far too narrow to see from low Earth orbit without optical aids. Multiple astronauts have confirmed this. The myth has been officially debunked." },
-  { s:"Humans evolved directly from chimpanzees.", isTrue:false, emoji:"🐒", cat:"Science", exp:"Humans and chimps share a common ancestor, but we didn't evolve *from* chimps. Both species evolved separately from that ancestor. Chimps are our cousins, not our parents." },
-  { s:"Cracking your knuckles will give you arthritis if you do it too much.", isTrue:false, emoji:"🤙", cat:"Science", exp:"Multiple studies disprove this. One doctor cracked knuckles on only one hand for 60 years and compared them — no difference. The sound is just gas bubbles popping in the joint fluid." },
+  // SCIENCE
+  { s:"The Eiffel Tower grows about 15 cm taller every summer due to the heat expanding the metal.", isTrue:true,  e:"🗼", cat:"Science", x:"Iron expands when heated. On hot summer days, the Eiffel Tower's 7,300 tonnes of iron can expand by up to 15cm. It shrinks back in winter." },
+  { s:"A bolt of lightning is five times hotter than the surface of the Sun.", isTrue:true,  e:"⚡", cat:"Science", x:"The Sun's surface is about 5,500°C. A lightning bolt reaches 30,000°C. The flash is brief, but it's scorching." },
+  { s:"Bananas are technically berries. Strawberries are not.", isTrue:true,  e:"🍌", cat:"Science", x:"Botanically, a berry develops from one flower with one ovary. Bananas qualify. Strawberries develop from multiple ovaries — making them 'accessory fruits', not berries." },
+  { s:"Humans share about 50% of their DNA with a banana.", isTrue:true,  e:"🧬", cat:"Science", x:"About 50% of human DNA matches bananas. We share 85% with mice, 96% with chimps. Life on Earth is remarkably similar at the molecular level." },
+  { s:"A day on Venus is longer than a year on Venus.", isTrue:true,  e:"🪐", cat:"Science", x:"Venus rotates so slowly that one full spin takes 243 Earth days. But it orbits the Sun in just 225 Earth days. The year is shorter than the day." },
+  { s:"There are more possible chess games than atoms in the entire observable universe.", isTrue:true,  e:"♟", cat:"Science", x:"The number of possible chess games is roughly 10 to the power of 120. The observable universe has about 10 to the power of 80 atoms. Chess wins by a cosmic margin." },
+  { s:"The dot over the letter i has an official name — it's called a tittle.", isTrue:true,  e:"📝", cat:"Science", x:"It's a real typographical term from Latin. The dot over j is also a tittle. Wins no arguments, but is undeniably a fact." },
+  { s:"You cannot hum while holding your nose closed.", isTrue:true,  e:"🤫", cat:"Science", x:"Try it. Humming requires air to flow through the nasal cavity. Block the nose and the sound stops completely." },
+  { s:"Alaska is simultaneously the easternmost, westernmost, and northernmost US state.", isTrue:true,  e:"🗺", cat:"Science", x:"Alaska's Aleutian Islands extend past the 180-degree meridian into the Eastern Hemisphere — making parts of Alaska further east than any other state, while also being furthest north and west." },
+  { s:"We only use about 10% of our brains.", isTrue:false, e:"🧠", cat:"Science", x:"Complete myth. Brain imaging shows virtually all areas are active almost all the time, even during sleep. 100% is in regular use." },
+  { s:"Dropping a penny from the Empire State Building could kill someone below.", isTrue:false, e:"🏢", cat:"Science", x:"A penny is too light and flat. It tumbles and reaches terminal velocity of 25–50 mph — enough to sting at most. It would not penetrate a skull. Physics ruins movie myths." },
+  { s:"Glass is a very slow-moving liquid — that's why old windows are thicker at the bottom.", isTrue:false, e:"🪟", cat:"Science", x:"Glass is an amorphous solid, not a slow liquid. Old windows are thicker at the bottom due to manufacturing techniques of the era, not because glass flowed downward." },
+  { s:"The Great Wall of China is visible from space with the naked eye.", isTrue:false, e:"🧱", cat:"Science", x:"The wall is far too narrow to see from orbit without aids. Multiple astronauts have confirmed this. It's one of history's most persistent myths." },
+  { s:"Humans evolved directly from chimpanzees.", isTrue:false, e:"🐒", cat:"Science", x:"Humans and chimps share a common ancestor but evolved separately from it. Chimps are our cousins, not our parents." },
+  { s:"Cracking your knuckles causes arthritis.", isTrue:false, e:"🤙", cat:"Science", x:"Multiple studies disprove this. One doctor cracked knuckles on only one hand for 60 years and compared them — no difference. The sound is just gas bubbles in joint fluid." },
 
-  // ── HISTORY ──
-  { s:"Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid.", isTrue:true,  emoji:"🔺", cat:"History", exp:"The Great Pyramid was built around 2560 BC. Cleopatra lived around 69 BC — over 2,400 years after. The Moon landing was 1969, only 2,038 years after Cleopatra. Time is humbling." },
-  { s:"Oxford University is older than the Aztec Empire.", isTrue:true,  emoji:"🏛️", cat:"History", exp:"Oxford started teaching around 1096–1167 AD. The Aztec Empire was founded in 1428. Oxford was already 300+ years old before the Aztecs even existed." },
-  { s:"Nintendo was originally founded as a playing card company — in 1889.", isTrue:true,  emoji:"🃏", cat:"History", exp:"Fusajiro Yamauchi founded Nintendo Koppai in Kyoto to make handmade playing cards. It stayed in cards for 70+ years before pivoting to toys, then video games in the 1970s." },
-  { s:"Woolly mammoths were still alive when the Great Pyramid of Giza was being built.", isTrue:true,  emoji:"🦣", cat:"History", exp:"Most mammoths died out 10,000 years ago, but a dwarf population survived on Wrangel Island until about 1650 BC. The Great Pyramid was completed around 2560 BC — mammoths were still alive then." },
-  { s:"The shortest war in history lasted just 38 to 45 minutes.", isTrue:true,  emoji:"⚔️", cat:"History", exp:"The Anglo-Zanzibar War of 1896. Britain issued an ultimatum; Zanzibar didn't comply. At 9:02am the British fleet opened fire. By 9:40am, Zanzibar had surrendered." },
-  { s:"Napoleon Bonaparte was extremely short — only about 5 feet tall.", isTrue:false, emoji:"👨", cat:"History", exp:"Napoleon was actually 5'7\" (170cm) — average or even slightly above average for a French man of his era. The myth came from British propaganda and a mix-up between French and English inches." },
-  { s:"In Mary Shelley's novel, Frankenstein is the name of the monster.", isTrue:false, emoji:"👹", cat:"History", exp:"Frankenstein is the name of the scientist — Victor Frankenstein. The creature is never given a name in the novel. Calling the monster Frankenstein is one of literature's most common mix-ups." },
-  { s:"Mount Everest is the closest point on Earth to outer space.", isTrue:false, emoji:"🏔️", cat:"History", exp:"Because Earth bulges at the equator, Mount Chimborazo in Ecuador is about 2km closer to outer space than Everest. Everest is only tallest above sea level." },
-  { s:"The Great Fire of London in 1666 killed thousands of people.", isTrue:false, emoji:"🔥", cat:"History", exp:"Remarkably, the Great Fire killed only 6 confirmed people despite destroying 13,200 houses and 87 churches. The medieval buildings burned fast but people had time to flee." },
+  // HISTORY
+  { s:"Cleopatra lived closer in time to the Moon landing than to the building of the Great Pyramid.", isTrue:true,  e:"🔺", cat:"History", x:"The Great Pyramid was built around 2560 BC. Cleopatra lived around 69 BC — over 2,400 years later. The Moon landing was 1969, only 2,038 years after Cleopatra. Time is humbling." },
+  { s:"Oxford University is older than the Aztec Empire.", isTrue:true,  e:"🏛", cat:"History", x:"Oxford started teaching around 1096–1167 AD. The Aztec Empire was founded in 1428. Oxford was already 300 years old before the Aztecs even existed." },
+  { s:"Nintendo was originally a playing card company, founded in 1889.", isTrue:true,  e:"🃏", cat:"History", x:"Fusajiro Yamauchi founded Nintendo Koppai in Kyoto to make handmade playing cards. It stayed in cards for 70+ years before pivoting to toys and then video games." },
+  { s:"Woolly mammoths were still alive when the Great Pyramid of Giza was being built.", isTrue:true,  e:"🦣", cat:"History", x:"Most mammoths died out 10,000 years ago, but a dwarf population survived on Wrangel Island until about 1650 BC. The Great Pyramid was finished around 2560 BC — mammoths were alive then." },
+  { s:"The shortest war in history lasted between 38 and 45 minutes.", isTrue:true,  e:"⚔", cat:"History", x:"The Anglo-Zanzibar War of 1896. Britain issued an ultimatum. At 9:02am the fleet opened fire. By 9:40am, Zanzibar had surrendered. Decisive." },
+  { s:"Napoleon Bonaparte was only about 5 feet tall.", isTrue:false, e:"👨", cat:"History", x:"Napoleon was actually 5 foot 7 — average or above average for a French man of his era. The myth came from British propaganda and a confusion between French and English inches." },
+  { s:"In Mary Shelley's novel, Frankenstein is the name of the monster.", isTrue:false, e:"👹", cat:"History", x:"Frankenstein is the scientist — Victor Frankenstein. The creature is never named in the novel. Calling the monster Frankenstein is one of literature's most common mix-ups." },
+  { s:"Mount Everest is the closest point on Earth to outer space.", isTrue:false, e:"🏔", cat:"History", x:"Because Earth bulges at the equator, Mount Chimborazo in Ecuador is about 2km closer to space than Everest. Everest is only the tallest above sea level." },
+  { s:"The Great Fire of London in 1666 killed thousands of people.", isTrue:false, e:"🔥", cat:"History", x:"Remarkably, the Great Fire killed only 6 confirmed people despite destroying 13,200 houses and 87 churches. Buildings burned fast but people had time to flee." },
 
-  // ── FOOD ──
-  { s:"Honey found inside Egyptian tombs is still perfectly edible after 3,000 years.", isTrue:true,  emoji:"🍯", cat:"Food", exp:"Honey is the only food that doesn't spoil. Its low moisture, acidic pH and hydrogen peroxide make it hostile to bacteria. Archaeologists have tasted 3,000-year-old tomb honey — it was fine." },
-  { s:"Carrots were originally purple. The orange variety was bred in the Netherlands.", isTrue:true,  emoji:"🥕", cat:"Food", exp:"Wild carrots were originally purple, white, or yellow. Dutch growers in the 17th century cultivated orange carrots, possibly to honour the House of Orange. The orange carrot then took over the world." },
-  { s:"Peanuts are not actually nuts — they're legumes, in the same family as beans and lentils.", isTrue:true,  emoji:"🥜", cat:"Food", exp:"Peanuts grow underground in pods, not on trees like true nuts. They're botanically a legume, making them closer to chickpeas than to almonds or walnuts." },
-  { s:"Eating carrots improves your eyesight and can reverse poor vision.", isTrue:false, emoji:"👁️", cat:"Food", exp:"Carrots are rich in Vitamin A, which supports eye health. But if you're not deficient, eating more won't improve vision. The myth was partly British WWII propaganda to hide radar technology." },
-  { s:"Sugar makes children hyperactive — this has been scientifically proven.", isTrue:false, emoji:"🍭", cat:"Food", exp:"Multiple double-blind studies found no link between sugar and hyperactivity in children. Parents perceive their kids as more energetic after sugar, but it's expectation bias. The science is clear." },
-  { s:"Different zones of the tongue detect different tastes — sweet at front, bitter at back.", isTrue:false, emoji:"👅", cat:"Food", exp:"The 'tongue map' has been completely debunked. All taste buds across the tongue can detect all five tastes: sweet, sour, salty, bitter, and umami. The diagram was based on a mistranslation." },
-  { s:"Chocolate was once used as currency by the Aztecs.", isTrue:true,  emoji:"🍫", cat:"Food", exp:"Cacao beans were so valuable to the Aztecs that they used them as currency. You could buy a turkey for 100 cacao beans. Chocolate was also a drink reserved for warriors and royalty." },
-  { s:"Cucumbers are technically a fruit, not a vegetable.", isTrue:true,  emoji:"🥒", cat:"Food", exp:"Botanically, a fruit is the mature ovary of a flowering plant containing seeds. Cucumbers develop from flowers and contain seeds — so they're fruits. Same goes for tomatoes, peppers, and courgettes." },
+  // FOOD
+  { s:"Honey from Egyptian tombs is still edible after 3,000 years.", isTrue:true,  e:"🍯", cat:"Food", x:"Honey never spoils. Its low moisture, acidic pH, and hydrogen peroxide make it hostile to bacteria. Archaeologists have tasted 3,000-year-old tomb honey — it was fine." },
+  { s:"Carrots were originally purple. The orange variety was bred later in the Netherlands.", isTrue:true,  e:"🥕", cat:"Food", x:"Wild carrots were originally purple, white, or yellow. Dutch growers in the 17th century cultivated orange ones, possibly to honour the House of Orange." },
+  { s:"Peanuts are not actually nuts — they're legumes, related to beans and lentils.", isTrue:true,  e:"🥜", cat:"Food", x:"Peanuts grow underground in pods, not on trees like true nuts. They're botanically a legume, closer to chickpeas than almonds." },
+  { s:"Chocolate was used as currency by the Aztecs.", isTrue:true,  e:"🍫", cat:"Food", x:"Cacao beans were so valuable to the Aztecs they used them as money. You could buy a turkey for 100 beans. Chocolate was reserved for warriors and royalty as a drink." },
+  { s:"Cucumbers are technically a fruit, not a vegetable.", isTrue:true,  e:"🥒", cat:"Food", x:"Botanically, a fruit is a mature ovary of a flowering plant containing seeds. Cucumbers have seeds and develop from flowers. Same goes for tomatoes, peppers, and courgettes." },
+  { s:"Eating carrots improves your eyesight and can reverse poor vision.", isTrue:false, e:"👁", cat:"Food", x:"Carrots have Vitamin A which supports eye health — but only if you're deficient. Eating more won't improve normal vision. The myth was partly British WWII propaganda to hide radar technology." },
+  { s:"Sugar makes children hyperactive — science has proven this.", isTrue:false, e:"🍭", cat:"Food", x:"Multiple double-blind studies found zero link between sugar and hyperactivity. Parents perceive kids as more energetic after sugar, but it's expectation bias. The science is definitive." },
+  { s:"Different parts of your tongue detect different tastes — sweet at the front, bitter at the back.", isTrue:false, e:"👅", cat:"Food", x:"The tongue map has been completely debunked. All taste buds detect all five tastes: sweet, sour, salty, bitter, and umami. The diagram in textbooks was based on a mistranslation." },
 
-  // ── HUMAN BODY ──
-  { s:"Your stomach gets an entirely new lining every 3 to 4 days because the acid would otherwise digest it.", isTrue:true,  emoji:"🫃", cat:"Human Body", exp:"Stomach acid is strong enough to dissolve metal. The stomach replaces its mucous lining every 3–4 days to prevent self-digestion. Without this, your stomach would eat itself." },
-  { s:"The human body has exactly 206 bones — that number never changes from birth.", isTrue:false, emoji:"🦴", cat:"Human Body", exp:"Babies are born with around 270–300 bones. As you grow, many fuse together, leaving adults with 206. So the number absolutely changes — you lose about 94 bones growing up." },
-  { s:"Your nose can detect over 1 trillion different smells.", isTrue:true,  emoji:"👃", cat:"Human Body", exp:"A 2014 Rockefeller University study found humans can detect at least 1 trillion distinct scents — far more than the long-cited 10,000. Our sense of smell is criminally underrated." },
-  { s:"The human eye can distinguish about 10 million different colours.", isTrue:true,  emoji:"👁️", cat:"Human Body", exp:"The human eye has around 6–7 million cone cells that detect colour. Combined, they let us perceive roughly 10 million distinct shades. Women are statistically slightly better at this than men." },
-  { s:"Hair and fingernails continue to grow after a person dies.", isTrue:false, emoji:"💅", cat:"Human Body", exp:"Complete myth. Growth requires hormones and cellular energy — both stop at death. What actually happens is the skin dehydrates and retracts slightly, making nails and stubble appear longer." },
-  { s:"Your heart beats roughly 100,000 times every single day.", isTrue:true,  emoji:"❤️", cat:"Human Body", exp:"At about 70 beats per minute, that's 100,800 beats per day, 36.5 million per year, and over 2.5 billion in a lifetime. The heart never takes a break — not even for a second." },
-  { s:"The human brain stops developing and fully matures by age 18.", isTrue:false, emoji:"🧠", cat:"Human Body", exp:"The brain — especially the prefrontal cortex, which controls decision-making and impulse control — doesn't fully mature until around age 25. This is why teenagers make questionable decisions. Science backs it up." },
-  { s:"Humans are the only animals that blush.", isTrue:true,  emoji:"😳", cat:"Human Body", exp:"Charles Darwin called blushing 'the most peculiar and most human of all expressions'. No other animal is known to blush in response to social emotions. It's uniquely, awkwardly human." },
-  { s:"Your left lung is smaller than your right lung to make room for your heart.", isTrue:true,  emoji:"🫁", cat:"Human Body", exp:"The left lung has only 2 lobes while the right has 3, and the left is slightly smaller with a notch called the cardiac notch — carved out to accommodate the heart. Efficient design." },
-  { s:"The strongest muscle in the human body, relative to its size, is the tongue.", isTrue:true,  emoji:"👅", cat:"Human Body", exp:"The tongue is actually made of 8 interwoven muscles that never tire. Relative to its size, it's the hardest-working muscle in the body — used for eating, speaking, swallowing, every day, all day." },
-  { s:"Humans shed their entire outer layer of skin every 2 to 4 weeks.", isTrue:true,  emoji:"🧴", cat:"Human Body", exp:"You lose about 30,000–40,000 dead skin cells every hour. The outer skin layer (epidermis) fully replaces itself every 2–4 weeks. A significant portion of household dust is dead human skin." },
-  { s:"The human body has only 5 senses: sight, hearing, smell, taste, and touch.", isTrue:false, emoji:"🤲", cat:"Human Body", exp:"Humans have at least 9 commonly accepted senses — possibly more. These include proprioception (body position), vestibular sense (balance), thermoception (temperature), nociception (pain), and interoception (internal body state)." },
-  { s:"Your blood vessels, if stretched end to end, would circle the Earth about 2.5 times.", isTrue:true,  emoji:"🩸", cat:"Human Body", exp:"The human body contains roughly 100,000 km of blood vessels — arteries, veins, and capillaries combined. Earth's circumference is about 40,000 km. That's 2.5 laps around the planet inside one body." },
-  { s:"Humans are the only mammals that can't digest lactose as adults — all others can.", isTrue:false, emoji:"🥛", cat:"Human Body", exp:"Most mammals lose the ability to digest lactose after weaning — that's the biological norm. Humans who can digest it as adults are actually the exception, thanks to a genetic mutation that arose in farming populations." },
-  { s:"Your brain is about 73% water, and being just 2% dehydrated can impair your memory and concentration.", isTrue:true,  emoji:"💧", cat:"Human Body", exp:"The brain is highly water-dependent. Even mild dehydration of 1–2% body weight affects cognitive performance, mood, and memory. Staying hydrated isn't just good advice — it's brain maintenance." },
-  { s:"Humans have a 'diving reflex' that automatically slows the heart rate when the face enters cold water.", isTrue:true,  emoji:"🏊", cat:"Human Body", exp:"The mammalian dive reflex is triggered by cold water on the face. The heart rate slows, blood is redirected to vital organs, and the spleen releases oxygen-rich red blood cells. It's a survival instinct we share with dolphins and seals." },
-  { s:"The appendix is completely useless — a leftover from evolution with no known function.", isTrue:false, emoji:"🤒", cat:"Human Body", exp:"The appendix was long considered vestigial, but research suggests it may serve as a 'safe house' for beneficial gut bacteria, helping to repopulate the gut after illness. It also has immune tissue. Not useless after all." },
-  { s:"Humans are the only animals that can throw objects with power and accuracy.", isTrue:true,  emoji:"🤾", cat:"Human Body", exp:"Our shoulder anatomy, flexible wrist, and coordinated muscle firing is unique. Chimpanzees — despite being stronger — can barely throw at 20mph. Humans can throw at over 90mph. This ability was key to our survival as hunters." },
+  // HUMAN BODY
+  { s:"Your stomach replaces its entire inner lining every 3 to 4 days, otherwise it would digest itself.", isTrue:true,  e:"🫃", cat:"Human Body", x:"Stomach acid is strong enough to dissolve metal. The stomach rebuilds its mucous lining every 3–4 days. Without this, it would eat through itself." },
+  { s:"Your nose can detect over 1 trillion different smells.", isTrue:true,  e:"👃", cat:"Human Body", x:"A 2014 Rockefeller University study found humans detect at least 1 trillion distinct scents — far more than the long-cited figure of 10,000. Our sense of smell is massively underrated." },
+  { s:"The human eye can distinguish about 10 million different colours.", isTrue:true,  e:"👁", cat:"Human Body", x:"The eye has 6–7 million cone cells for colour detection. Combined, they let us see roughly 10 million distinct shades. Women are statistically slightly better at this than men." },
+  { s:"Your heart beats roughly 100,000 times every single day.", isTrue:true,  e:"❤", cat:"Human Body", x:"At 70 beats per minute, that's 100,800 beats per day, 36.5 million per year, over 2.5 billion in a lifetime. The heart never takes a break." },
+  { s:"Humans are the only animals that blush.", isTrue:true,  e:"😳", cat:"Human Body", x:"Charles Darwin called blushing the most peculiar and most human of all expressions. No other animal is known to blush in response to social emotions. It's uniquely, awkwardly human." },
+  { s:"Your left lung is smaller than your right lung to make room for your heart.", isTrue:true,  e:"🫁", cat:"Human Body", x:"The left lung has 2 lobes, the right has 3. The left has a notch called the cardiac notch — carved out to fit the heart. Efficient design." },
+  { s:"The strongest muscle in the body, relative to its size, is the tongue.", isTrue:true,  e:"👅", cat:"Human Body", x:"The tongue is 8 interwoven muscles that never tire. Relative to size, it's the hardest-working muscle — used for eating, speaking, and swallowing every day." },
+  { s:"Humans shed their entire outer skin layer every 2 to 4 weeks.", isTrue:true,  e:"🧴", cat:"Human Body", x:"You lose 30,000–40,000 dead skin cells every hour. The epidermis fully replaces itself every 2–4 weeks. A significant portion of household dust is actually dead human skin." },
+  { s:"Your blood vessels, laid end to end, would circle the Earth about 2.5 times.", isTrue:true,  e:"🩸", cat:"Human Body", x:"The body has roughly 100,000 km of blood vessels — arteries, veins, and capillaries combined. Earth's circumference is 40,000 km. That's 2.5 laps of the planet inside one body." },
+  { s:"Your brain is about 73% water, and just 2% dehydration can noticeably impair memory and focus.", isTrue:true,  e:"💧", cat:"Human Body", x:"Even mild dehydration of 1–2% of body weight affects cognitive performance, mood, and memory. Staying hydrated is literally brain maintenance." },
+  { s:"Humans have a diving reflex — cold water on the face automatically slows your heart rate.", isTrue:true,  e:"🏊", cat:"Human Body", x:"The mammalian dive reflex slows the heart, redirects blood to vital organs, and triggers the spleen to release oxygen-rich red blood cells. We share it with dolphins and seals." },
+  { s:"Humans are the only animals that can throw objects with power and accuracy.", isTrue:true,  e:"🤾", cat:"Human Body", x:"Our shoulder anatomy and wrist flexibility is unique. Chimps, despite being stronger, barely throw at 20 mph. Humans can exceed 90 mph. This was key to our survival as hunters." },
+  { s:"The human body has exactly 206 bones from birth — that number never changes.", isTrue:false, e:"🦴", cat:"Human Body", x:"Babies are born with around 270–300 bones. Many fuse as you grow, leaving adults with 206. You effectively lose about 90 bones growing up." },
+  { s:"Hair and fingernails continue to grow after death.", isTrue:false, e:"💅", cat:"Human Body", x:"Complete myth. Growth requires hormones and cellular energy — both stop at death. What happens is skin dehydrates and retracts slightly, making nails and stubble appear longer." },
+  { s:"The human brain is fully mature by age 18.", isTrue:false, e:"🧠", cat:"Human Body", x:"The prefrontal cortex — which handles decision-making and impulse control — doesn't fully mature until around 25. This is why teenagers make questionable choices. Science backs it up." },
+  { s:"The human body has exactly 5 senses: sight, hearing, smell, taste, and touch.", isTrue:false, e:"🤲", cat:"Human Body", x:"Humans have at least 9 commonly accepted senses — including proprioception (body position), balance, temperature, pain, and interoception (internal body state). The 5-sense rule is a simplification." },
+  { s:"The appendix is completely useless — a leftover from evolution with no function.", isTrue:false, e:"🤒", cat:"Human Body", x:"Research suggests the appendix acts as a safe house for beneficial gut bacteria, helping repopulate the gut after illness. It also contains immune tissue. Probably not useless after all." }
 ];
 
-const CATS = ['All','Animals','Science','History','Food','Human Body'];
-const CAT_EMOJIS = { All:'🎲', Animals:'🐾', Science:'🔬', History:'⏳', Food:'🍽️', 'Human Body':'🫀' };
+var CATS       = ['All','Animals','Science','History','Food','Human Body'];
+var CAT_EMOJIS = { All:'🎲', Animals:'🐾', Science:'🔬', History:'⏳', Food:'🍽', 'Human Body':'🫀' };
 
-let pool = [];
-let used = 0;
-let correct = 0;
-let total = 0;
-let current = null;
-let voted = false;
-let activeCat = 'All';
+var pool       = [];
+var used       = 0;
+var correct    = 0;
+var total      = 0;
+var current    = null;
+var voted      = false;
+var activeCat  = 'All';
 
-function init() {
-  // Build category buttons
-  const el = document.getElementById('cats');
-  el.innerHTML = CATS.map(c => `
-    <button class="cat-btn ${c === activeCat ? 'active' : ''}" onclick="selectCat('${c}')">
-      ${CAT_EMOJIS[c]} ${c}
-    </button>`).join('');
-  buildPool();
-  nextFact();
-}
+// ── DOM refs ──
+var elCats    = document.getElementById('cats');
+var elCard    = document.getElementById('factCard');
+var elEmoji   = document.getElementById('factEmoji');
+var elText    = document.getElementById('factText');
+var elTag     = document.getElementById('factTag');
+var elTruth   = document.getElementById('btnTruth');
+var elLie     = document.getElementById('btnLie');
+var elReveal  = document.getElementById('reveal');
+var elVerdict = document.getElementById('verdict');
+var elExplain = document.getElementById('explain');
+var elNext    = document.getElementById('btnNext');
+var elScore   = document.getElementById('scorePill');
+var elTally   = document.getElementById('tally');
+
+// ── Build category buttons ──
+CATS.forEach(function(cat) {
+  var btn = document.createElement('button');
+  btn.className = 'cat-btn' + (cat === activeCat ? ' active' : '');
+  btn.textContent = CAT_EMOJIS[cat] + ' ' + cat;
+  btn.addEventListener('click', function() { selectCat(cat); });
+  elCats.appendChild(btn);
+});
+
+// ── Vote button listeners ──
+elTruth.addEventListener('click', function() { vote(true); });
+elLie.addEventListener('click',   function() { vote(false); });
+elNext.addEventListener('click',  nextFact);
 
 function selectCat(cat) {
   activeCat = cat;
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.textContent.trim().includes(cat)));
+  var btns = elCats.querySelectorAll('.cat-btn');
+  btns.forEach(function(b, i) {
+    b.classList.toggle('active', CATS[i] === cat);
+  });
   buildPool();
   nextFact();
 }
 
 function buildPool() {
-  const source = activeCat === 'All' ? FACTS : FACTS.filter(f => f.cat === activeCat);
-  pool = shuffle([...source]);
+  var source = activeCat === 'All' ? FACTS : FACTS.filter(function(f) { return f.cat === activeCat; });
+  pool = shuffle(source.slice());
   used = 0;
 }
 
 function nextFact() {
-  if (used >= pool.length) buildPool(); // reshuffle when exhausted
+  if (used >= pool.length) buildPool();
   current = pool[used++];
-  voted = false;
+  voted   = false;
 
-  document.getElementById('factCard').className = 'fact-card';
-  document.getElementById('factEmoji').textContent = current.emoji;
-  document.getElementById('factText').textContent = current.s;
-  const catEl = document.getElementById('factCat');
-  catEl.textContent = current.cat;
-  catEl.style.display = 'inline-block';
+  elCard.className    = 'fact-card';
+  elEmoji.textContent = current.e;
+  elText.textContent  = current.s;
+  elTag.textContent   = current.cat;
 
-  document.getElementById('btnTruth').className = 'btn-vote btn-truth';
-  document.getElementById('btnLie').className   = 'btn-vote btn-lie';
-  document.getElementById('revealPanel').className = 'reveal-panel';
-  document.getElementById('btnNext').className = 'btn-next';
-  updateCounter();
+  elTruth.className = 'btn-truth';
+  elLie.className   = 'btn-lie';
+  elReveal.className = 'reveal';
+  elNext.className   = 'btn-next';
 }
 
 function vote(guessTrue) {
@@ -381,66 +332,38 @@ function vote(guessTrue) {
   voted = true;
   total++;
 
-  const isCorrect = guessTrue === current.isTrue;
-  if (isCorrect) correct++;
+  var correct_guess = (guessTrue === current.isTrue);
+  if (correct_guess) correct++;
 
-  // Style chosen / dimmed buttons
-  document.getElementById('btnTruth').className = 'btn-vote btn-truth' + (guessTrue  ? ' chosen' : ' dimmed');
-  document.getElementById('btnLie').className   = 'btn-vote btn-lie'   + (!guessTrue ? ' chosen' : ' dimmed');
+  elTruth.className = 'btn-truth' + (guessTrue  ? ' chosen' : ' faded');
+  elLie.className   = 'btn-lie'   + (!guessTrue ? ' chosen' : ' faded');
 
-  // Fact card border
-  document.getElementById('factCard').className = 'fact-card ' + (isCorrect ? 'correct' : 'wrong');
+  elCard.className = 'fact-card ' + (correct_guess ? 'is-correct' : 'is-wrong');
 
-  // Reveal panel
-  const panel = document.getElementById('revealPanel');
-  const verdict = document.getElementById('verdict');
-  const explanation = document.getElementById('explanation');
+  elVerdict.className   = 'verdict ' + (correct_guess ? 'correct' : 'wrong');
+  elVerdict.textContent = correct_guess
+    ? (current.isTrue ? '✅ Correct — it\'s TRUE!' : '✅ Correct — it\'s a LIE!')
+    : (current.isTrue ? '❌ Wrong — it was TRUE!'  : '❌ Wrong — it was a LIE!');
+  elExplain.textContent = current.x;
+  elReveal.className    = 'reveal show';
+  elNext.className      = 'btn-next show';
 
-  if (isCorrect) {
-    verdict.className = 'verdict v-correct';
-    verdict.textContent = current.isTrue ? '✅ Correct — it\'s TRUE!' : '✅ Correct — it\'s a LIE!';
-  } else {
-    verdict.className = 'verdict v-wrong';
-    verdict.textContent = current.isTrue ? '❌ Wrong — it was TRUE!' : '❌ Wrong — it was a LIE!';
-  }
-  explanation.textContent = current.exp;
-  panel.className = 'reveal-panel show';
-
-  document.getElementById('btnNext').className = 'btn-next show';
-  updateCounter();
-}
-
-function updateCounter() {
-  const el = document.getElementById('scoreChip');
-  el.textContent = `${correct} / ${total}`;
-  const counter = document.getElementById('counter');
-  if (total > 0) {
-    const pct = Math.round(correct / total * 100);
-    counter.textContent = `${pct}% correct across ${total} fact${total !== 1 ? 's' : ''}`;
-  } else {
-    counter.textContent = '';
-  }
-}
-
-function toggleQR() {
-  const panel = document.getElementById('qrPanel');
-  const showing = panel.style.display !== 'none';
-  if (!showing) {
-    const url = encodeURIComponent('https://cdn.jsdelivr.net/gh/bhavit743/chatscope@b3a0e02e5948524c72c18bd65c6d68c4834c9c98/truth-or-lie.html');
-    document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${url}`;
-  }
-  panel.style.display = showing ? 'none' : 'flex';
+  elScore.textContent = correct + ' / ' + total;
+  var pct = Math.round(correct / total * 100);
+  elTally.textContent = pct + '% correct across ' + total + ' fact' + (total !== 1 ? 's' : '');
 }
 
 function shuffle(arr) {
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = arr[i]; arr[i] = arr[j]; arr[j] = t;
   }
   return arr;
 }
 
-init();
+// Start
+buildPool();
+nextFact();
 </script>
 </body>
 </html>
