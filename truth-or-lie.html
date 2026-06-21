@@ -169,6 +169,25 @@
   @media (max-width: 400px) {
     .btn-vote { font-size: 16px; padding: 16px 10px; }
   }
+
+  /* QR */
+  .qr-btn {
+    font-size: 20px; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 10px;
+    width: 38px; height: 38px; cursor: pointer; transition: background 0.15s;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .qr-btn:hover { background: rgba(255,255,255,0.12); }
+  .qr-panel {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 100; display: flex; align-items: center; justify-content: center;
+    animation: fadeIn 0.2s ease;
+  }
+  .qr-inner {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 24px;
+    display: flex; flex-direction: column; align-items: center;
+  }
 </style>
 </head>
 <body>
@@ -176,7 +195,22 @@
 
   <div class="header">
     <div class="logo">Truth or <em>Lie?</em> 🤔</div>
-    <div class="score-chip" id="scoreChip">0 / 0</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="qr-btn" onclick="toggleQR()" title="Open on phone">📱</button>
+      <div class="score-chip" id="scoreChip">0 / 0</div>
+    </div>
+  </div>
+
+  <!-- QR panel -->
+  <div class="qr-panel" id="qrPanel" style="display:none">
+    <div class="qr-inner">
+      <div style="font-size:13px;color:var(--muted);margin-bottom:10px">Scan to open on your phone</div>
+      <img id="qrImg" src="" alt="QR Code" style="width:160px;height:160px;border-radius:12px;background:#fff;padding:8px">
+      <div style="font-size:11px;color:var(--muted);margin-top:10px;max-width:200px;text-align:center;line-height:1.5">
+        Or <strong>email / AirDrop</strong> the downloaded .html file to yourself
+      </div>
+      <button onclick="toggleQR()" style="margin-top:12px;background:none;border:1px solid rgba(255,255,255,0.1);color:var(--muted);padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px">Close</button>
+    </div>
   </div>
 
   <div class="cat-label">Pick a category</div>
@@ -266,10 +300,30 @@ const FACTS = [
   { s:"Different zones of the tongue detect different tastes — sweet at front, bitter at back.", isTrue:false, emoji:"👅", cat:"Food", exp:"The 'tongue map' has been completely debunked. All taste buds across the tongue can detect all five tastes: sweet, sour, salty, bitter, and umami. The diagram was based on a mistranslation." },
   { s:"Chocolate was once used as currency by the Aztecs.", isTrue:true,  emoji:"🍫", cat:"Food", exp:"Cacao beans were so valuable to the Aztecs that they used them as currency. You could buy a turkey for 100 cacao beans. Chocolate was also a drink reserved for warriors and royalty." },
   { s:"Cucumbers are technically a fruit, not a vegetable.", isTrue:true,  emoji:"🥒", cat:"Food", exp:"Botanically, a fruit is the mature ovary of a flowering plant containing seeds. Cucumbers develop from flowers and contain seeds — so they're fruits. Same goes for tomatoes, peppers, and courgettes." },
+
+  // ── HUMAN BODY ──
+  { s:"Your stomach gets an entirely new lining every 3 to 4 days because the acid would otherwise digest it.", isTrue:true,  emoji:"🫃", cat:"Human Body", exp:"Stomach acid is strong enough to dissolve metal. The stomach replaces its mucous lining every 3–4 days to prevent self-digestion. Without this, your stomach would eat itself." },
+  { s:"The human body has exactly 206 bones — that number never changes from birth.", isTrue:false, emoji:"🦴", cat:"Human Body", exp:"Babies are born with around 270–300 bones. As you grow, many fuse together, leaving adults with 206. So the number absolutely changes — you lose about 94 bones growing up." },
+  { s:"Your nose can detect over 1 trillion different smells.", isTrue:true,  emoji:"👃", cat:"Human Body", exp:"A 2014 Rockefeller University study found humans can detect at least 1 trillion distinct scents — far more than the long-cited 10,000. Our sense of smell is criminally underrated." },
+  { s:"The human eye can distinguish about 10 million different colours.", isTrue:true,  emoji:"👁️", cat:"Human Body", exp:"The human eye has around 6–7 million cone cells that detect colour. Combined, they let us perceive roughly 10 million distinct shades. Women are statistically slightly better at this than men." },
+  { s:"Hair and fingernails continue to grow after a person dies.", isTrue:false, emoji:"💅", cat:"Human Body", exp:"Complete myth. Growth requires hormones and cellular energy — both stop at death. What actually happens is the skin dehydrates and retracts slightly, making nails and stubble appear longer." },
+  { s:"Your heart beats roughly 100,000 times every single day.", isTrue:true,  emoji:"❤️", cat:"Human Body", exp:"At about 70 beats per minute, that's 100,800 beats per day, 36.5 million per year, and over 2.5 billion in a lifetime. The heart never takes a break — not even for a second." },
+  { s:"The human brain stops developing and fully matures by age 18.", isTrue:false, emoji:"🧠", cat:"Human Body", exp:"The brain — especially the prefrontal cortex, which controls decision-making and impulse control — doesn't fully mature until around age 25. This is why teenagers make questionable decisions. Science backs it up." },
+  { s:"Humans are the only animals that blush.", isTrue:true,  emoji:"😳", cat:"Human Body", exp:"Charles Darwin called blushing 'the most peculiar and most human of all expressions'. No other animal is known to blush in response to social emotions. It's uniquely, awkwardly human." },
+  { s:"Your left lung is smaller than your right lung to make room for your heart.", isTrue:true,  emoji:"🫁", cat:"Human Body", exp:"The left lung has only 2 lobes while the right has 3, and the left is slightly smaller with a notch called the cardiac notch — carved out to accommodate the heart. Efficient design." },
+  { s:"The strongest muscle in the human body, relative to its size, is the tongue.", isTrue:true,  emoji:"👅", cat:"Human Body", exp:"The tongue is actually made of 8 interwoven muscles that never tire. Relative to its size, it's the hardest-working muscle in the body — used for eating, speaking, swallowing, every day, all day." },
+  { s:"Humans shed their entire outer layer of skin every 2 to 4 weeks.", isTrue:true,  emoji:"🧴", cat:"Human Body", exp:"You lose about 30,000–40,000 dead skin cells every hour. The outer skin layer (epidermis) fully replaces itself every 2–4 weeks. A significant portion of household dust is dead human skin." },
+  { s:"The human body has only 5 senses: sight, hearing, smell, taste, and touch.", isTrue:false, emoji:"🤲", cat:"Human Body", exp:"Humans have at least 9 commonly accepted senses — possibly more. These include proprioception (body position), vestibular sense (balance), thermoception (temperature), nociception (pain), and interoception (internal body state)." },
+  { s:"Your blood vessels, if stretched end to end, would circle the Earth about 2.5 times.", isTrue:true,  emoji:"🩸", cat:"Human Body", exp:"The human body contains roughly 100,000 km of blood vessels — arteries, veins, and capillaries combined. Earth's circumference is about 40,000 km. That's 2.5 laps around the planet inside one body." },
+  { s:"Humans are the only mammals that can't digest lactose as adults — all others can.", isTrue:false, emoji:"🥛", cat:"Human Body", exp:"Most mammals lose the ability to digest lactose after weaning — that's the biological norm. Humans who can digest it as adults are actually the exception, thanks to a genetic mutation that arose in farming populations." },
+  { s:"Your brain is about 73% water, and being just 2% dehydrated can impair your memory and concentration.", isTrue:true,  emoji:"💧", cat:"Human Body", exp:"The brain is highly water-dependent. Even mild dehydration of 1–2% body weight affects cognitive performance, mood, and memory. Staying hydrated isn't just good advice — it's brain maintenance." },
+  { s:"Humans have a 'diving reflex' that automatically slows the heart rate when the face enters cold water.", isTrue:true,  emoji:"🏊", cat:"Human Body", exp:"The mammalian dive reflex is triggered by cold water on the face. The heart rate slows, blood is redirected to vital organs, and the spleen releases oxygen-rich red blood cells. It's a survival instinct we share with dolphins and seals." },
+  { s:"The appendix is completely useless — a leftover from evolution with no known function.", isTrue:false, emoji:"🤒", cat:"Human Body", exp:"The appendix was long considered vestigial, but research suggests it may serve as a 'safe house' for beneficial gut bacteria, helping to repopulate the gut after illness. It also has immune tissue. Not useless after all." },
+  { s:"Humans are the only animals that can throw objects with power and accuracy.", isTrue:true,  emoji:"🤾", cat:"Human Body", exp:"Our shoulder anatomy, flexible wrist, and coordinated muscle firing is unique. Chimpanzees — despite being stronger — can barely throw at 20mph. Humans can throw at over 90mph. This ability was key to our survival as hunters." },
 ];
 
-const CATS = ['All','Animals','Science','History','Food'];
-const CAT_EMOJIS = { All:'🎲', Animals:'🐾', Science:'🔬', History:'⏳', Food:'🍽️' };
+const CATS = ['All','Animals','Science','History','Food','Human Body'];
+const CAT_EMOJIS = { All:'🎲', Animals:'🐾', Science:'🔬', History:'⏳', Food:'🍽️', 'Human Body':'🫀' };
 
 let pool = [];
 let used = 0;
@@ -366,6 +420,16 @@ function updateCounter() {
   } else {
     counter.textContent = '';
   }
+}
+
+function toggleQR() {
+  const panel = document.getElementById('qrPanel');
+  const showing = panel.style.display !== 'none';
+  if (!showing) {
+    const url = encodeURIComponent('https://cdn.jsdelivr.net/gh/bhavit743/chatscope@b3a0e02e5948524c72c18bd65c6d68c4834c9c98/truth-or-lie.html');
+    document.getElementById('qrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${url}`;
+  }
+  panel.style.display = showing ? 'none' : 'flex';
 }
 
 function shuffle(arr) {
